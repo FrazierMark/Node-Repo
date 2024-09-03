@@ -257,8 +257,216 @@ async function seed() {
 	})
 	console.timeEnd(`🐨 Created admin user "kody"`)
 
+	console.time('👤 Created additional test user and related data')
+	
+	const testUser = await prisma.user.create({
+		data: {
+			email: 'test@test.com',
+			username: 'testuser',
+			password: { create: createPassword('password') },
+			roles: { connect: { name: 'user' } },
+		},
+	})
+
+	const homeWorkspace = await prisma.workspace.create({
+		data: {
+			userId: testUser.id,
+			name: 'Home',
+			description: 'This is for testing.',
+			defaultContextLength: 4000,
+			defaultModel: 'gpt-4-turbo-preview',
+			defaultPrompt: 'You are an assistant.',
+			defaultTemperature: 0.5,
+			includeProfileContext: true,
+			includeWorkspaceInstructions: true,
+			instructions: 'These are the instructions.',
+			isHome: true,
+			sharing: 'private',
+			embeddingsProvider: 'openai',
+		},
+	})
+
+	const chatFolder = await prisma.folder.create({
+		data: {
+			userId: testUser.id,
+			workspaceId: homeWorkspace.id,
+			name: 'Chat Folder 1',
+			description: 'This is a folder for chats',
+			type: 'chats',
+		},
+	})
+
+	const file = await prisma.file.create({
+		data: {
+			userId: testUser.id,
+			name: 'File 1',
+			description: 'This is a file for testing',
+			filePath: 'https://example.com/file1',
+			size: 1000000,
+			tokens: 250,
+			type: 'pdf',
+		},
+	})
+
+	await prisma.fileWorkspace.create({
+		data: {
+			userId: testUser.id,
+			fileId: file.id,
+			workspaceId: homeWorkspace.id,
+		},
+	})
+
+	const preset = await prisma.preset.create({
+		data: {
+			userId: testUser.id,
+			sharing: 'private',
+			includeProfileContext: true,
+			includeWorkspaceInstructions: true,
+			contextLength: 4000,
+			model: 'gpt-4-turbo-preview',
+			name: 'Preset 1',
+			prompt: 'Prompt 1',
+			temperature: 0.5,
+			description: 'Description for Preset 1',
+			embeddingsProvider: 'openai',
+		},
+	})
+
+	await prisma.presetWorkspace.create({
+		data: {
+			userId: testUser.id,
+			presetId: preset.id,
+			workspaceId: homeWorkspace.id,
+		},
+	})
+
+	const assistant = await prisma.assistant.create({
+		data: {
+			userId: testUser.id,
+			name: 'Albert Einstein',
+			description: 'This is an Albert Einstein assistant.',
+			model: 'gpt-4-turbo-preview',
+			imagePath: '',
+			sharing: 'private',
+			contextLength: 4000,
+			includeProfileContext: true,
+			includeWorkspaceInstructions: true,
+			prompt: 'You are Albert Einstein.',
+			temperature: 0.5,
+			embeddingsProvider: 'openai',
+		},
+	})
+
+	await prisma.assistantWorkspace.create({
+		data: {
+			userId: testUser.id,
+			assistantId: assistant.id,
+			workspaceId: homeWorkspace.id,
+		},
+	})
+
+	const chat = await prisma.chat.create({
+		data: {
+			userId: testUser.id,
+			workspaceId: homeWorkspace.id,
+			name: 'Chat 1',
+			model: 'gpt-4-turbo-preview',
+			prompt: 'You are an assistant.',
+			temperature: 0.5,
+			contextLength: 4000,
+			includeProfileContext: true,
+			includeWorkspaceInstructions: true,
+			embeddingsProvider: 'openai',
+		},
+	})
+
+	const messages = [
+		{ role: 'user', content: 'Hello! This is a long message with **markdown**. It contains multiple sentences and paragraphs. Let me add more content to this message. I am a user interacting with an AI assistant. I can ask the assistant to perform various tasks, such as generating text, answering questions, and even writing code. The assistant uses a powerful language model to understand my requests and generate appropriate responses. This is a very interesting and exciting technology!' },
+		{ role: 'assistant', content: 'How are you? This is another long message with *italic markdown*. It also contains multiple sentences and paragraphs. Let me add more content to this message. As an AI assistant, I can understand and respond to a wide range of requests. I can generate text, answer questions, and even write code. I use a powerful language model to understand your requests and generate appropriate responses. This is a very interesting and exciting technology!' },
+		{role: 'user', content: 'I am fine, thank you! This is a third long message with [link markdown](http://example.com). It contains even more sentences and paragraphs. Let me add even more content to this message. As a user, I can interact with the AI assistant in a variety of ways. I can ask it to generate text, answer questions, and even write code. The assistant uses a powerful language model to understand my requests and generate appropriate responses. This is a very interesting and exciting technology!'},
+		{role: 'assistant', content: 'Great to hear that! This is a fourth long message with `code markdown`. It contains a lot of sentences and paragraphs. Let me add even more content to this message. As an AI assistant, I can understand and respond to a wide range of requests. I can generate text, answer questions, and even write code. I use a powerful language model to understand your requests and generate appropriate responses. This is a very interesting and exciting technology!'},
+		{role: 'user', content: 'What can you do? This is a fifth long message with > blockquote markdown. It contains a ton of sentences and paragraphs. Let me add even more content to this message. As a user, I can interact with the AI assistant in a variety of ways. I can ask it to generate text, answer questions, and even write code. The assistant uses a powerful language model to understand my requests and generate appropriate responses. This is a very interesting and exciting technology!'},
+		{role: 'assistant', content: 'I can assist you with various tasks. This is a sixth long message with - list markdown. It contains an enormous amount of sentences and paragraphs. Let me add even more content to this message. As an AI assistant, I can understand and respond to a wide range of requests. I can generate text, answer questions, and even write code. I use a powerful language model to understand your requests and generate appropriate responses. This is a very interesting and exciting technology!'},
+		{role: 'user', content: 'Can you assist me with my homework? This is a seventh long message with 1. numbered list markdown. It contains a plethora of sentences and paragraphs. Let me add even more content to this message. As a user, I can interact with the AI assistant in a variety of ways. I can ask it to generate text, answer questions, and even write code. The assistant uses a powerful language model to understand my requests and generate appropriate responses. This is a very interesting and exciting technology!'},
+		{role: 'assistant', content: 'Sure, I would be happy to help. What do you need assistance with? This is an eighth long message with --- horizontal rule markdown. It contains a multitude of sentences and paragraphs. Let me add even more content to this message. As an AI assistant, I can understand and respond to a wide range of requests. I can generate text, answer questions, and even write code. I use a powerful language model to understand your requests and generate appropriate responses. This is a very interesting and exciting technology!'},
+		{role: 'user', content: 'I need help with my math homework. This is a ninth long message with # heading markdown. It contains a vast number of sentences and paragraphs. Let me add even more content to this message. As a user, I can interact with the AI assistant in a variety of ways. I can ask it to generate text, answer questions, and even write code. The assistant uses a powerful language model to understand my requests and generate appropriate responses. This is a very interesting and exciting technology!'},
+	]
+
+	for (let i = 0; i < messages.length; i++) {
+		await prisma.message.create({
+			data: {
+				userId: testUser.id,
+				chatId: chat.id,
+				content: messages[i]?.content ?? 'Empty Content',
+				role: messages[i]?.role ?? 'Empty Role',
+				model: 'gpt-4-turbo-preview',
+				sequenceNumber: i,
+			},
+		})
+	}
+
+	const prompt = await prisma.prompt.create({
+		data: {
+			userId: testUser.id,
+			sharing: 'private',
+			content: 'I want you to act as a storyteller. You will come up with entertaining stories that are engaging, imaginative and captivating for the audience. It can be fairy tales, educational stories or any other type of stories which has the potential to capture people\'s attention and imagination. Depending on the target audience, you may choose specific themes or topics for your storytelling session e.g., if it\'s children then you can talk about animals; If it\'s adults then history-based tales might engage them better etc. My first request is \'I need an interesting story on perseverance.\'',
+			name: 'Storyteller',
+		},
+	})
+
+	await prisma.promptWorkspace.create({
+		data: {
+			userId: testUser.id,
+			promptId: prompt.id,
+			workspaceId: homeWorkspace.id,
+		},
+	})
+
+	const collection = await prisma.collection.create({
+		data: {
+			userId: testUser.id,
+			name: 'Collection 1',
+			description: 'This is a description for Collection 1',
+			sharing: 'private',
+		},
+	})
+
+	await prisma.collectionWorkspace.create({
+		data: {
+			userId: testUser.id,
+			collectionId: collection.id,
+			workspaceId: homeWorkspace.id,
+		},
+	})
+
+	const tool = await prisma.tool.create({
+		data: {
+			userId: testUser.id,
+			description: 'This is a description for Tool 1',
+			name: 'Tool 1',
+			schema: '{}',
+			url: 'http://example.com',
+			sharing: 'private',
+			customHeaders: '{}',
+		},
+	})
+
+	await prisma.toolWorkspace.create({
+		data: {
+			userId: testUser.id,
+			toolId: tool.id,
+			workspaceId: homeWorkspace.id,
+		},
+	})
+
+	console.timeEnd('👤 Created additional test user and related data')
+
 	console.timeEnd(`🌱 Database has been seeded`)
 }
+
+
+
+
 
 seed()
 	.catch((e) => {
