@@ -126,7 +126,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export const meta: MetaFunction = () => {
-	return [{ title: 'Setup Epic Notes Account' }]
+	return [{ title: 'Setup Node Repo Account' }]
 }
 
 export default function OnboardingRoute() {

@@ -9,7 +9,7 @@ import { cn } from '#app/utils/misc.tsx'
 import { logos } from './logos/logos.ts'
 import SphereSVG from './logos/sphere.tsx'
 
-export const meta: MetaFunction = () => [{ title: 'Epic Notes' }]
+export const meta: MetaFunction = () => [{ title: 'Node Repo' }]
 
 // Tailwind Grid cell classes lookup
 const columnClasses: Record<(typeof logos)[number]['column'], string> = {
