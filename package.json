@@ -66,6 +66,7 @@
     "@remix-run/react": "2.10.3",
     "@sentry/profiling-node": "^8.18.0",
     "@sentry/remix": "^8.18.0",
+    "@tabler/icons-react": "^3.14.0",
     "@types/three": "^0.167.2",
     "address": "^2.0.3",
     "bcryptjs": "^2.4.3",
