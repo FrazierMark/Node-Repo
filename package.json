@@ -159,6 +159,7 @@
     "prettier-plugin-sql": "^0.18.1",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "prisma": "^5.19.1",
+    "prisma-models": "^0.0.2",
     "remix-flat-routes": "^0.6.5",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3",
