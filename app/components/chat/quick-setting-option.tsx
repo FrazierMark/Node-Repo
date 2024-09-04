@@ -1,7 +1,7 @@
-import { LLM_LIST } from "@/lib/models/llm/llm-list"
-import { Tables } from "@/supabase/types"
+import { LLM_LIST } from "../../lib/models/llm/llm-list"
+import { DbModels } from '../../../types/dbModels'
 import { IconCircleCheckFilled, IconRobotFace } from "@tabler/icons-react"
-import Image from "next/image"
+// import Image from "next/image"
 import { FC } from "react"
 import { ModelIcon } from "../models/model-icon"
 import { DropdownMenuItem } from "../ui/dropdown-menu"
@@ -9,7 +9,7 @@ import { DropdownMenuItem } from "../ui/dropdown-menu"
 interface QuickSettingOptionProps {
   contentType: "presets" | "assistants"
   isSelected: boolean
-  item: Tables<"presets"> | Tables<"assistants">
+  item: DbModels["Preset"] | DbModels["Assistant"]
   onSelect: () => void
   image: string
 }
@@ -37,7 +37,7 @@ export const QuickSettingOption: FC<QuickSettingOptionProps> = ({
             height={32}
           />
         ) : image ? (
-          <Image
+          <img
             style={{ width: "32px", height: "32px" }}
             className="rounded"
             src={image}

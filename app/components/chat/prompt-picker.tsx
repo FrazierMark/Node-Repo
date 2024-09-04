@@ -1,5 +1,5 @@
-import { ChatbotUIContext } from "@/context/context"
-import { Tables } from "@/supabase/types"
+import { ChatbotUIContext } from "../../../context/context"
+import { DbModels } from '../../../types/dbModels'
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { Button } from "../ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
@@ -47,7 +47,7 @@ export const PromptPicker: FC<PromptPickerProps> = ({}) => {
     setIsPromptPickerOpen(isOpen)
   }
 
-  const callSelectPrompt = (prompt: Tables<"prompts">) => {
+  const callSelectPrompt = (prompt: DbModels["Prompt"]) => {
     const regex = /\{\{.*?\}\}/g
     const matches = prompt.content.match(regex)
 
@@ -73,7 +73,9 @@ export const PromptPicker: FC<PromptPickerProps> = ({}) => {
         handleOpenChange(false)
       } else if (e.key === "Enter") {
         e.preventDefault()
-        callSelectPrompt(filteredPrompts[index])
+        if (filteredPrompts[index]) {
+          callSelectPrompt(filteredPrompts[index]);
+        }
       } else if (
         (e.key === "Tab" || e.key === "ArrowDown") &&
         !e.shiftKey &&
@@ -104,12 +106,12 @@ export const PromptPicker: FC<PromptPickerProps> = ({}) => {
           new RegExp(`\\{\\{${variable.name}\\}\\}`, "g"),
           variable.value
         ),
-      prompts.find(prompt => prompt.id === promptVariables[0].promptId)
+      prompts.find(prompt => prompt.id === promptVariables[0]?.promptId)
         ?.content || ""
     )
 
     const newPrompt: any = {
-      ...prompts.find(prompt => prompt.id === promptVariables[0].promptId),
+      ...prompts.find(prompt => prompt.id === promptVariables[0]?.promptId),
       content: newPromptContent
     }
 
@@ -157,7 +159,9 @@ export const PromptPicker: FC<PromptPickerProps> = ({}) => {
                         value={variable.value}
                         onValueChange={value => {
                           const newPromptVariables = [...promptVariables]
-                          newPromptVariables[index].value = value
+                          if (newPromptVariables[index]) {
+                            newPromptVariables[index].value = value;
+                          }
                           setPromptVariables(newPromptVariables)
                         }}
                         minRows={3}

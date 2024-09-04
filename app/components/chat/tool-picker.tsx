@@ -1,5 +1,5 @@
-import { ChatbotUIContext } from "@/context/context"
-import { Tables } from "@/supabase/types"
+import { ChatbotUIContext } from "../../../context/context"
+import { DbModels } from '../../../types/dbModels'
 import { IconBolt } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef } from "react"
 import { usePromptAndCommand } from "./chat-hooks/use-prompt-and-command"
@@ -33,7 +33,7 @@ export const ToolPicker: FC<ToolPickerProps> = ({}) => {
     setIsToolPickerOpen(isOpen)
   }
 
-  const callSelectTool = (tool: Tables<"tools">) => {
+  const callSelectTool = (tool: DbModels["Tool"]) => {
     handleSelectTool(tool)
     handleOpenChange(false)
   }
@@ -45,7 +45,9 @@ export const ToolPicker: FC<ToolPickerProps> = ({}) => {
         handleOpenChange(false)
       } else if (e.key === "Enter") {
         e.preventDefault()
-        callSelectTool(filteredTools[index])
+        if (filteredTools[index]) {
+          callSelectTool(filteredTools[index]);
+        }
       } else if (
         (e.key === "Tab" || e.key === "ArrowDown") &&
         !e.shiftKey &&
@@ -87,7 +89,7 @@ export const ToolPicker: FC<ToolPickerProps> = ({}) => {
                   }}
                   tabIndex={0}
                   className="hover:bg-accent focus:bg-accent flex cursor-pointer items-center rounded p-2 focus:outline-none"
-                  onClick={() => callSelectTool(item as Tables<"tools">)}
+                  onClick={() => callSelectTool(item as DbModels["Tool"])}
                   onKeyDown={getKeyDownHandler(index)}
                 >
                   <IconBolt size={32} />

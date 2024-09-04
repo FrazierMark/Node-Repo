@@ -5,7 +5,6 @@ import { getChatsByWorkspaceId } from "@/db/chats"
 import { getCollectionWorkspacesByWorkspaceId } from "@/db/collections"
 import { getFileWorkspacesByWorkspaceId } from "@/db/files"
 import { getFoldersByWorkspaceId } from "@/db/folders"
-import { getModelWorkspacesByWorkspaceId } from "@/db/models"
 import { getPresetWorkspacesByWorkspaceId } from "@/db/presets"
 import { getPromptWorkspacesByWorkspaceId } from "@/db/prompts"
 import { getAssistantImageFromStorage } from "@/db/storage/assistant-images"
@@ -13,7 +12,7 @@ import { getToolWorkspacesByWorkspaceId } from "@/db/tools"
 import { getWorkspaceById } from "@/db/workspaces"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import { supabase } from "@/lib/supabase/browser-client"
-import { LLMID } from "@/types"
+import { LLMID } from "../../../types"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { ReactNode, useContext, useEffect, useState } from "react"
 import Loading from "../loading"
@@ -40,7 +39,6 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setPresets,
     setPrompts,
     setTools,
-    setModels,
     selectedWorkspace,
     setSelectedWorkspace,
     setSelectedChat,
@@ -150,9 +148,6 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
     const toolData = await getToolWorkspacesByWorkspaceId(workspaceId)
     setTools(toolData.tools)
-
-    const modelData = await getModelWorkspacesByWorkspaceId(workspaceId)
-    setModels(modelData.models)
 
     setChatSettings({
       model: (searchParams.get("model") ||

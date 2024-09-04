@@ -1,8 +1,8 @@
-import { ChatbotUIContext } from "@/context/context"
+import { ChatbotUIContext } from "../../../context/context"
 import { getFileFromStorage } from "@/db/storage/files"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { cn } from "@/lib/utils"
-import { ChatFile, MessageImage } from "@/types"
+import { ChatFile, MessageImage } from "../../../types"
 import {
   IconCircleFilled,
   IconFileFilled,
