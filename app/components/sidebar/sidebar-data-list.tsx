@@ -1,15 +1,15 @@
-import { ChatbotUIContext } from "@/context/context"
-import { updateAssistant } from "@/db/assistants"
-import { updateChat } from "@/db/chats"
-import { updateCollection } from "@/db/collections"
-import { updateFile } from "@/db/files"
-import { updateModel } from "@/db/models"
-import { updatePreset } from "@/db/presets"
-import { updatePrompt } from "@/db/prompts"
-import { updateTool } from "@/db/tools"
-import { cn } from "@/lib/utils"
-import { Tables } from "@/supabase/types"
-import { ContentType, DataItemType, DataListType } from "@/types"
+import { ChatbotUIContext } from "../../../context/context"
+import { updateAssistant } from "../../utils/assistants.server"
+import { updateChat } from "#app/utils/chats.server"
+import { updateCollection } from "#app/utils/collections.server"
+
+import { updatePreset } from "#app/utils/presets.server"
+import { updatePrompt } from "#app/utils/prompts.server"
+import { updateTool } from "#app/utils/tools.server"
+import { cn } from '#app/utils/misc.tsx'
+import { DbModels } from '../../../types/dbModels'
+import { ContentType } from "../../../types/content-type"
+import { DataItemType, DataListType } from "../../../types/sidebar-data"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { Separator } from "../ui/separator"
 import { AssistantItem } from "./items/assistants/assistant-item"
@@ -17,7 +17,6 @@ import { ChatItem } from "./items/chat/chat-item"
 import { CollectionItem } from "./items/collections/collection-item"
 import { FileItem } from "./items/files/file-item"
 import { Folder } from "./items/folders/folder-item"
-import { ModelItem } from "./items/models/model-item"
 import { PresetItem } from "./items/presets/preset-item"
 import { PromptItem } from "./items/prompts/prompt-item"
 import { ToolItem } from "./items/tools/tool-item"
@@ -25,7 +24,7 @@ import { ToolItem } from "./items/tools/tool-item"
 interface SidebarDataListProps {
   contentType: ContentType
   data: DataListType
-  folders: Tables<"folders">[]
+  folders: DbModels["Folder"][]
 }
 
 export const SidebarDataList: FC<SidebarDataListProps> = ({
@@ -41,7 +40,6 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     setCollections,
     setAssistants,
     setTools,
-    setModels
   } = useContext(ChatbotUIContext)
 
   const divRef = useRef<HTMLDivElement>(null)
@@ -55,22 +53,22 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
   ) => {
     switch (contentType) {
       case "chats":
-        return <ChatItem key={item.id} chat={item as Tables<"chats">} />
+        return <ChatItem key={item.id} chat={item as DbModels["Chat"]} />
 
       case "presets":
-        return <PresetItem key={item.id} preset={item as Tables<"presets">} />
+        return <PresetItem key={item.id} preset={item as DbModels["Preset"]} />
 
       case "prompts":
-        return <PromptItem key={item.id} prompt={item as Tables<"prompts">} />
+        return <PromptItem key={item.id} prompt={item as DbModels["Prompt"]} />
 
       case "files":
-        return <FileItem key={item.id} file={item as Tables<"files">} />
+        return <FileItem key={item.id} file={item as DbModels["File"]} />
 
       case "collections":
         return (
           <CollectionItem
             key={item.id}
-            collection={item as Tables<"collections">}
+            collection={item as DbModels["Collection"]}
           />
         )
 
@@ -78,15 +76,12 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
         return (
           <AssistantItem
             key={item.id}
-            assistant={item as Tables<"assistants">}
+            assistant={item as DbModels["Assistant"]}
           />
         )
 
       case "tools":
-        return <ToolItem key={item.id} tool={item as Tables<"tools">} />
-
-      case "models":
-        return <ModelItem key={item.id} model={item as Tables<"models">} />
+        return <ToolItem key={item.id} tool={item as DbModels["Tool"]} />
 
       default:
         return null
@@ -136,11 +131,10 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     chats: updateChat,
     presets: updatePreset,
     prompts: updatePrompt,
-    files: updateFile,
     collections: updateCollection,
     assistants: updateAssistant,
     tools: updateTool,
-    models: updateModel
+    files: () => {},
   }
 
   const stateUpdateFunctions = {
@@ -151,7 +145,6 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     collections: setCollections,
     assistants: setAssistants,
     tools: setTools,
-    models: setModels
   }
 
   const updateFolder = async (itemId: string, folderId: string | null) => {
@@ -165,14 +158,16 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     if (!updateFunction || !setStateFunction) return
 
     const updatedItem = await updateFunction(item.id, {
-      folder_id: folderId
+      folderId: folderId
     })
 
-    setStateFunction((items: any) =>
-      items.map((item: any) =>
-        item.id === updatedItem.id ? updatedItem : item
+    if (updatedItem) {
+      setStateFunction((items: any) =>
+        items.map((item: any) =>
+          item.id === updatedItem.id ? updatedItem : item
+        )
       )
-    )
+    }
   }
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
@@ -214,8 +209,8 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     }
   }, [data])
 
-  const dataWithFolders = data.filter(item => item.folder_id)
-  const dataWithoutFolders = data.filter(item => item.folder_id === null)
+  const dataWithFolders = (data as (DataItemType & { folder_id: string | null })[]).filter(item => item.folder_id)
+  const dataWithoutFolders = (data as (DataItemType & { folder_id: string | null })[]).filter(item => item.folder_id === null)
 
   return (
     <>

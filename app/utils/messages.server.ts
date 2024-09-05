@@ -1,4 +1,4 @@
-import { prisma } from '#app/utils/db.server'
+import { prisma } from './db.server.ts'
 import type { Prisma } from '@prisma/client'
 
 export const getMessageById = async (messageId: string) => {
@@ -15,11 +15,9 @@ export const getMessageById = async (messageId: string) => {
 
 export const getMessagesByChatId = async (chatId: string) => {
   const messages = await prisma.message.findMany({
-    where: { chatId },
+    where: { chatId: chatId },
     include: {
-      imagePaths: {
-        select: { path: true }
-      }
+      imagePaths: true,
     }
   })
 
@@ -27,15 +25,12 @@ export const getMessagesByChatId = async (chatId: string) => {
     throw new Error("Messages not found")
   }
 
-  return messages.map(message => ({
-    ...message,
-    imagePaths: message.imagePaths.map(imagePath => imagePath.path)
-  }))
+  return messages
 }
 
 export const createMessage = async (message: Prisma.MessageCreateInput) => {
   const createdMessage = await prisma.message.create({
-    data: message
+    data: message,
   })
 
   if (!createdMessage) {
@@ -63,7 +58,7 @@ export const updateMessage = async (
 ) => {
   const updatedMessage = await prisma.message.update({
     where: { id: messageId },
-    data: message
+    data: message,
   })
 
   if (!updatedMessage) {
@@ -89,8 +84,8 @@ export async function deleteMessagesIncludingAndAfter(
   try {
     await prisma.message.deleteMany({
       where: {
-        userId,
-        chatId,
+        userId: userId,
+        chatId: chatId,
         sequenceNumber: {
           gte: sequenceNumber
         }

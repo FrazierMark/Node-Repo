@@ -1,12 +1,14 @@
-import { prisma } from '#app/utils/db.server'
+import { prisma } from './db.server.ts'
 import type { Prisma } from '@prisma/client'
 
 export const getChatFilesByChatId = async (chatId: string) => {
   const chatFiles = await prisma.chat.findUnique({
     where: { id: chatId },
-    include: {
+    select: {
+      id: true,
+      name: true,
       ChatFile: {
-        include: {
+        select: {
           file: true
         }
       }
@@ -20,7 +22,7 @@ export const getChatFilesByChatId = async (chatId: string) => {
   return {
     id: chatFiles.id,
     name: chatFiles.name,
-    files: chatFiles.ChatFile.map(cf => cf.file)
+    files: chatFiles.ChatFile.map((cf: { file: any }) => cf.file)
   }
 }
 

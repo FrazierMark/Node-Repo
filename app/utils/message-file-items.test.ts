@@ -74,9 +74,11 @@ test('getMessageFileItemsByMessageId returns correct data', async () => {
     data: {
       fileId: file.id,
       userId: user.id,
-      content: 'Test file item content',
       tokens: 100,
       sharing: 'private',
+      content: 'Test file item content',
+      localEmbedding: 'Test local embedding',
+      openaiEmbedding: 'Test openai embedding',
     }
   })
 
@@ -93,6 +95,7 @@ test('getMessageFileItemsByMessageId returns correct data', async () => {
   const result = await getMessageFileItemsByMessageId(message.id)
 
   console.log(result)
+  console.log(result.file_items[0])
 
   // Assert the expected structure and content of the result
   expect(result).toHaveProperty('id')

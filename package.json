@@ -95,6 +95,7 @@
     "leva": "^0.9.35",
     "litefs-js": "^1.1.2",
     "lru-cache": "^11.0.0",
+    "mammoth": "^1.8.0",
     "monaco-editor": "^0.51.0",
     "morgan": "^1.10.0",
     "npm": "^10.8.3",
