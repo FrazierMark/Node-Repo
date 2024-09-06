@@ -9,7 +9,7 @@ import { getMessagesByChatId } from '../../utils/messages.server'
 import { getMessageImageFromStorage } from '../../utils/images.server'
 import { convertBlobToBase64 } from '../../lib/blob-to-b64'
 import useHotkey from '../../lib/hooks/use-hotkey'
-import { ChatFileItem, LLMID, MessageImage } from '../../../types'
+import { LLMID, MessageImage } from '../../../types'
 import { useParams } from '@remix-run/react'
 import { FC, useContext, useEffect, useState } from 'react'
 import { ChatHelp } from './chat-help'
@@ -33,13 +33,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
 		setSelectedChat,
 		setChatSettings,
 		setChatImages,
-		assistants,
-		setSelectedAssistant,
 		setChatFileItems,
 		setChatFiles,
 		setShowFilesDisplay,
 		setUseRetrieval,
-		setSelectedTools,
 	} = useContext(ChatbotUIContext)
 
 	const { handleNewChat, handleFocusChatInput } = useChatHandler()
@@ -157,22 +154,6 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
 	const fetchChat = async () => {
 		const chat = await getChatById(params.chatid as string)
 		if (!chat) return
-
-		if (chat.assistantId) {
-			const assistant = assistants.find(
-				(assistant) => assistant.id === chat.assistantId,
-			)
-
-			if (assistant) {
-				setSelectedAssistant(assistant)
-
-				const assistantTools = (
-					await getAssistantToolsByAssistantId(assistant.id)
-				).tools
-        // @ts-expect-error Temporarily ignoring type mismatch until we update the types
-				setSelectedTools(assistantTools)
-			}
-		}
 
     // @ts-expect-error Temporarily ignoring type mismatch until we update the types
 		setSelectedChat(chat)

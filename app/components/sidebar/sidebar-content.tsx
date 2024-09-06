@@ -1,5 +1,6 @@
-import { Tables } from "@/supabase/types"
-import { ContentType, DataListType } from "@/types"
+import { DbModels } from '#app/../types/dbModels'
+import { ContentType } from "#app/../types/content-type"
+import { DataListType } from "#app/../types/sidebar-data.ts"
 import { FC, useState } from "react"
 import { SidebarCreateButtons } from "./sidebar-create-buttons"
 import { SidebarDataList } from "./sidebar-data-list"
@@ -8,7 +9,7 @@ import { SidebarSearch } from "./sidebar-search"
 interface SidebarContentProps {
   contentType: ContentType
   data: DataListType
-  folders: Tables<"folders">[]
+  folders: DbModels["Folder"][]
 }
 
 export const SidebarContent: FC<SidebarContentProps> = ({
@@ -18,7 +19,9 @@ export const SidebarContent: FC<SidebarContentProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("")
 
+  // @ts-expect-error Temporarily ignoring type mismatch until we update the types
   const filteredData: any = data.filter(item =>
+    // @ts-expect-error Temporarily ignoring type mismatch until we update the types
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 

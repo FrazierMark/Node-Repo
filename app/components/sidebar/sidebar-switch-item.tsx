@@ -1,4 +1,4 @@
-import { ContentType } from "@/types"
+import { ContentType } from "#app/../types/content-type"
 import { FC } from "react"
 import { TabsTrigger } from "../ui/tabs"
 import { WithTooltip } from "../ui/with-tooltip"
@@ -17,7 +17,7 @@ export const SidebarSwitchItem: FC<SidebarSwitchItemProps> = ({
   return (
     <WithTooltip
       display={
-        <div>{contentType[0].toUpperCase() + contentType.substring(1)}</div>
+        <div>{contentType[0]?.toUpperCase() + contentType.substring(1)}</div>
       }
       trigger={
         <TabsTrigger

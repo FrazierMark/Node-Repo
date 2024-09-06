@@ -1,20 +1,16 @@
-import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
-import { ChatbotUIContext } from "@/context/context"
-import { createFolder } from "@/db/folders"
-import { ContentType } from "@/types"
+import { useChatHandler } from "#app/components/chat/chat-hooks/use-chat-handler"
+import { ChatbotUIContext } from "#app/../context/context"
+import { createFolder } from "#app/utils/folders.server"
+import { ContentType } from "#app/../types/content-type"
 import { IconFolderPlus, IconPlus } from "@tabler/icons-react"
 import { FC, useContext, useState } from "react"
 import { Button } from "../ui/button"
-import { CreateAssistant } from "./items/assistants/create-assistant"
-import { CreateCollection } from "./items/collections/create-collection"
-import { CreateFile } from "./items/files/create-file"
-import { CreateModel } from "./items/models/create-model"
 import { CreatePreset } from "./items/presets/create-preset"
 import { CreatePrompt } from "./items/prompts/create-prompt"
-import { CreateTool } from "./items/tools/create-tool"
+import { DbModels } from '../../../types/dbModels'
 
 interface SidebarCreateButtonsProps {
-  contentType: ContentType
+  contentType: ContentType | string
   hasData: boolean
 }
 
@@ -29,23 +25,19 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
   const [isCreatingPrompt, setIsCreatingPrompt] = useState(false)
   const [isCreatingPreset, setIsCreatingPreset] = useState(false)
   const [isCreatingFile, setIsCreatingFile] = useState(false)
-  const [isCreatingCollection, setIsCreatingCollection] = useState(false)
-  const [isCreatingAssistant, setIsCreatingAssistant] = useState(false)
-  const [isCreatingTool, setIsCreatingTool] = useState(false)
-  const [isCreatingModel, setIsCreatingModel] = useState(false)
 
   const handleCreateFolder = async () => {
     if (!profile) return
     if (!selectedWorkspace) return
 
     const createdFolder = await createFolder({
-      user_id: profile.user_id,
-      workspace_id: selectedWorkspace.id,
+      userId: profile.userId,
+      workspaceId: selectedWorkspace.id,
       name: "New Folder",
       description: "",
       type: contentType
     })
-    setFolders([...folders, createdFolder])
+    setFolders([...folders, createdFolder as DbModels['Folder']])
   }
 
   const getCreateFunction = () => {
@@ -68,26 +60,6 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
       case "files":
         return async () => {
           setIsCreatingFile(true)
-        }
-
-      case "collections":
-        return async () => {
-          setIsCreatingCollection(true)
-        }
-
-      case "assistants":
-        return async () => {
-          setIsCreatingAssistant(true)
-        }
-
-      case "tools":
-        return async () => {
-          setIsCreatingTool(true)
-        }
-
-      case "models":
-        return async () => {
-          setIsCreatingModel(true)
         }
 
       default:
@@ -124,34 +96,6 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
         />
       )}
 
-      {isCreatingFile && (
-        <CreateFile isOpen={isCreatingFile} onOpenChange={setIsCreatingFile} />
-      )}
-
-      {isCreatingCollection && (
-        <CreateCollection
-          isOpen={isCreatingCollection}
-          onOpenChange={setIsCreatingCollection}
-        />
-      )}
-
-      {isCreatingAssistant && (
-        <CreateAssistant
-          isOpen={isCreatingAssistant}
-          onOpenChange={setIsCreatingAssistant}
-        />
-      )}
-
-      {isCreatingTool && (
-        <CreateTool isOpen={isCreatingTool} onOpenChange={setIsCreatingTool} />
-      )}
-
-      {isCreatingModel && (
-        <CreateModel
-          isOpen={isCreatingModel}
-          onOpenChange={setIsCreatingModel}
-        />
-      )}
     </div>
   )
 }

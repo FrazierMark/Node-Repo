@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "#app/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -7,19 +7,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "@/components/ui/dialog"
-import { ChatbotUIContext } from "@/context/context"
-import { deleteAssistant } from "@/db/assistants"
-import { deleteChat } from "@/db/chats"
-import { deleteCollection } from "@/db/collections"
-import { deleteFile } from "@/db/files"
-import { deleteModel } from "@/db/models"
-import { deletePreset } from "@/db/presets"
-import { deletePrompt } from "@/db/prompts"
-import { deleteFileFromStorage } from "@/db/storage/files"
-import { deleteTool } from "@/db/tools"
-import { Tables } from "@/supabase/types"
-import { ContentType, DataItemType } from "@/types"
+} from "#app/components/ui/dialog"
+import { ChatbotUIContext } from "#app/../context/context"
+import { deleteChat } from "#app/utils/chats.server"
+import { deletePreset } from "#app/utils/presets.server"
+import { deletePrompt } from "#app/utils/prompts.server"
+import { DbModels } from '#app/../types/dbModels'
+import { ContentType } from '#app/../types/content-type'
+import { DataItemType } from '#app/../types/sidebar-data'
 import { FC, useContext, useRef, useState } from "react"
 
 interface SidebarDeleteItemProps {
@@ -35,11 +30,6 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
     setChats,
     setPresets,
     setPrompts,
-    setFiles,
-    setCollections,
-    setAssistants,
-    setTools,
-    setModels
   } = useContext(ChatbotUIContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -47,33 +37,14 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
   const [showDialog, setShowDialog] = useState(false)
 
   const deleteFunctions = {
-    chats: async (chat: Tables<"chats">) => {
+    chats: async (chat: DbModels["Chat"]) => {
       await deleteChat(chat.id)
     },
-    presets: async (preset: Tables<"presets">) => {
+    presets: async (preset: DbModels["Preset"]) => {
       await deletePreset(preset.id)
     },
-    prompts: async (prompt: Tables<"prompts">) => {
+    prompts: async (prompt: DbModels["Prompt"]) => {
       await deletePrompt(prompt.id)
-    },
-    files: async (file: Tables<"files">) => {
-      await deleteFileFromStorage(file.file_path)
-      await deleteFile(file.id)
-    },
-    collections: async (collection: Tables<"collections">) => {
-      await deleteCollection(collection.id)
-    },
-    assistants: async (assistant: Tables<"assistants">) => {
-      await deleteAssistant(assistant.id)
-      setChats(prevState =>
-        prevState.filter(chat => chat.assistant_id !== assistant.id)
-      )
-    },
-    tools: async (tool: Tables<"tools">) => {
-      await deleteTool(tool.id)
-    },
-    models: async (model: Tables<"models">) => {
-      await deleteModel(model.id)
     }
   }
 
@@ -81,11 +52,6 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
     chats: setChats,
     presets: setPresets,
     prompts: setPrompts,
-    files: setFiles,
-    collections: setCollections,
-    assistants: setAssistants,
-    tools: setTools,
-    models: setModels
   }
 
   const handleDelete = async () => {

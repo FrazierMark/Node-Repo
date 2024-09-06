@@ -1,14 +1,14 @@
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { TextareaAutosize } from "@/components/ui/textarea-autosize"
-import { PROMPT_NAME_MAX } from "@/db/limits"
-import { Tables } from "@/supabase/types"
+import { Input } from "#app/components/ui/input"
+import { Label } from "#app/components/ui/label"
+import { TextareaAutosize } from "#app/components/ui/textarea-autosize"
+import { PROMPT_NAME_MAX } from "#app/utils/providers/constants"
+import { DbModels } from "#app/../types/dbModels"
 import { IconPencil } from "@tabler/icons-react"
 import { FC, useState } from "react"
 import { SidebarItem } from "../all/sidebar-display-item"
 
 interface PromptItemProps {
-  prompt: Tables<"prompts">
+  prompt: DbModels["Prompt"]
 }
 
 export const PromptItem: FC<PromptItemProps> = ({ prompt }) => {

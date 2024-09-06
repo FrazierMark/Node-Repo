@@ -1,9 +1,9 @@
-import { ChatbotUIContext } from "@/context/context"
-import { createChat } from "@/db/chats"
-import { cn } from "@/lib/utils"
-import { Tables } from "@/supabase/types"
-import { ContentType, DataItemType } from "@/types"
-import { useRouter } from "next/navigation"
+import { ChatbotUIContext } from "#app/../context/context"
+import { createChat } from "#app/utils/chats.server"
+import { cn } from '#app/utils/misc.tsx'
+import { DbModels } from '#app/../types/dbModels'
+import { ContentType, DataItemType } from "#app/../types"
+
 import { FC, useContext, useRef, useState } from "react"
 import { SidebarUpdateItem } from "./sidebar-update-item"
 
@@ -27,8 +27,6 @@ export const SidebarItem: FC<SidebarItemProps> = ({
   const { selectedWorkspace, setChats, setSelectedAssistant } =
     useContext(ChatbotUIContext)
 
-  const router = useRouter()
-
   const itemRef = useRef<HTMLDivElement>(null)
 
   const [isHovering, setIsHovering] = useState(false)
@@ -37,33 +35,6 @@ export const SidebarItem: FC<SidebarItemProps> = ({
     chats: async (item: any) => {},
     presets: async (item: any) => {},
     prompts: async (item: any) => {},
-    files: async (item: any) => {},
-    collections: async (item: any) => {},
-    assistants: async (assistant: Tables<"assistants">) => {
-      if (!selectedWorkspace) return
-
-      const createdChat = await createChat({
-        user_id: assistant.user_id,
-        workspace_id: selectedWorkspace.id,
-        assistant_id: assistant.id,
-        context_length: assistant.context_length,
-        include_profile_context: assistant.include_profile_context,
-        include_workspace_instructions:
-          assistant.include_workspace_instructions,
-        model: assistant.model,
-        name: `Chat with ${assistant.name}`,
-        prompt: assistant.prompt,
-        temperature: assistant.temperature,
-        embeddings_provider: assistant.embeddings_provider
-      })
-
-      setChats(prevState => [createdChat, ...prevState])
-      setSelectedAssistant(assistant)
-
-      return router.push(`/${selectedWorkspace.id}/chat/${createdChat.id}`)
-    },
-    tools: async (item: any) => {},
-    models: async (item: any) => {}
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

@@ -1,16 +1,15 @@
-import { ChatbotUIContext } from "../../../context/context"
-import { getAssistantCollectionsByAssistantId } from "@/db/assistant-collections"
-import { getAssistantFilesByAssistantId } from "@/db/assistant-files"
-import { getAssistantToolsByAssistantId } from "@/db/assistant-tools"
+import { ChatbotUIContext } from "#app/../context/context"
+import { getAssistantCollectionsByAssistantId } from "#app/utils/assistant-collections.server"
+import { getAssistantFilesByAssistantId } from "#app/utils/assistant-files.server"
+import { getAssistantToolsByAssistantId } from "#app/utils/assistant-tools.server"
 import { getCollectionFilesByCollectionId } from "@/db/collection-files"
-import useHotkey from "../../lib/hooks/use-hotkey"
-import { LLM_LIST } from "@/lib/models/llm/llm-list"
-import { Tables } from "@/supabase/types"
-import { LLMID } from "../../../types"
+import useHotkey from "#app/lib/hooks/use-hotkey"
+import { LLM_LIST } from "#app/lib/models/llm/llm-list"
+import { DbModels } from "#app/../types/dbModels"
+import { LLMID } from "#app/../types"
 import { IconChevronDown, IconRobotFace } from "@tabler/icons-react"
-import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
-import { useTranslation } from "react-i18next"
+import { useTranslation } from "remix-i18next"
 import { ModelIcon } from "../models/model-icon"
 import { Button } from "../ui/button"
 import {
@@ -20,7 +19,7 @@ import {
 } from "../ui/dropdown-menu"
 import { Input } from "../ui/input"
 import { QuickSettingOption } from "./quick-setting-option"
-import { set } from "date-fns"
+
 
 interface QuickSettingsProps {}
 
@@ -31,7 +30,6 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
 
   const {
     presets,
-    assistants,
     selectedAssistant,
     selectedPreset,
     chatSettings,
@@ -60,12 +58,12 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
   }, [isOpen])
 
   const handleSelectQuickSetting = async (
-    item: Tables<"presets"> | Tables<"assistants"> | null,
+    item: DbModels["Preset"] | DbModels["Assistant"] | null,
     contentType: "presets" | "assistants" | "remove"
   ) => {
     console.log({ item, contentType })
     if (contentType === "assistants" && item) {
-      setSelectedAssistant(item as Tables<"assistants">)
+      setSelectedAssistant(item as DbModels["Assistant"])
       setLoading(true)
       let allFiles = []
       const assistantFiles = (await getAssistantFilesByAssistantId(item.id))
@@ -95,7 +93,7 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
       setLoading(false)
       setSelectedPreset(null)
     } else if (contentType === "presets" && item) {
-      setSelectedPreset(item as Tables<"presets">)
+      setSelectedPreset(item as DbModels["Preset"])
       setSelectedAssistant(null)
       setChatFiles([])
       setSelectedTools([])
@@ -106,14 +104,14 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
       setSelectedTools([])
       if (selectedWorkspace) {
         setChatSettings({
-          model: selectedWorkspace.default_model as LLMID,
-          prompt: selectedWorkspace.default_prompt,
-          temperature: selectedWorkspace.default_temperature,
-          contextLength: selectedWorkspace.default_context_length,
-          includeProfileContext: selectedWorkspace.include_profile_context,
+          model: selectedWorkspace.defaultModel as LLMID,
+          prompt: selectedWorkspace.defaultPrompt,
+          temperature: selectedWorkspace.defaultTemperature,
+          contextLength: selectedWorkspace.defaultContextLength,
+          includeProfileContext: selectedWorkspace.includeProfileContext,
           includeWorkspaceInstructions:
-            selectedWorkspace.include_workspace_instructions,
-          embeddingsProvider: selectedWorkspace.embeddings_provider as
+            selectedWorkspace.includeWorkspaceInstructions,
+          embeddingsProvider: selectedWorkspace.embeddingsProvider as
             | "openai"
             | "local"
         })
@@ -125,10 +123,10 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
       model: item.model as LLMID,
       prompt: item.prompt,
       temperature: item.temperature,
-      contextLength: item.context_length,
-      includeProfileContext: item.include_profile_context,
-      includeWorkspaceInstructions: item.include_workspace_instructions,
-      embeddingsProvider: item.embeddings_provider as "openai" | "local"
+      contextLength: item.contextLength,
+      includeProfileContext: item.includeProfileContext,
+      includeWorkspaceInstructions: item.includeWorkspaceInstructions,
+      embeddingsProvider: item.embeddingsProvider as "openai" | "local"
     })
   }
 
@@ -137,22 +135,22 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
 
     if (selectedPreset) {
       return (
-        selectedPreset.include_profile_context !==
+        selectedPreset.includeProfileContext !==
           chatSettings?.includeProfileContext ||
-        selectedPreset.include_workspace_instructions !==
+        selectedPreset.includeWorkspaceInstructions !==
           chatSettings.includeWorkspaceInstructions ||
-        selectedPreset.context_length !== chatSettings.contextLength ||
+        selectedPreset.contextLength !== chatSettings.contextLength ||
         selectedPreset.model !== chatSettings.model ||
         selectedPreset.prompt !== chatSettings.prompt ||
         selectedPreset.temperature !== chatSettings.temperature
       )
     } else if (selectedAssistant) {
       return (
-        selectedAssistant.include_profile_context !==
+        selectedAssistant.includeProfileContext !==
           chatSettings.includeProfileContext ||
-        selectedAssistant.include_workspace_instructions !==
+        selectedAssistant.includeWorkspaceInstructions !==
           chatSettings.includeWorkspaceInstructions ||
-        selectedAssistant.context_length !== chatSettings.contextLength ||
+        selectedAssistant.contextLength !== chatSettings.contextLength ||
         selectedAssistant.model !== chatSettings.model ||
         selectedAssistant.prompt !== chatSettings.prompt ||
         selectedAssistant.temperature !== chatSettings.temperature
@@ -165,21 +163,17 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
   const isModified = checkIfModified()
 
   const items = [
-    ...presets.map(preset => ({ ...preset, contentType: "presets" })),
-    ...assistants.map(assistant => ({
-      ...assistant,
-      contentType: "assistants"
-    }))
+    ...presets.map(preset => ({ ...preset, contentType: "presets" }))
   ]
 
   const selectedAssistantImage = selectedPreset
     ? ""
     : assistantImages.find(
-        image => image.path === selectedAssistant?.image_path
+        image => image.path === selectedAssistant?.imagePath
       )?.base64 || ""
 
   const modelDetails = LLM_LIST.find(
-    model => model.modelId === selectedPreset?.model
+    (model: { modelId: string }) => model.modelId === selectedPreset?.model
   )
 
   return (
@@ -202,7 +196,7 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
 
           {selectedAssistant &&
             (selectedAssistantImage ? (
-              <Image
+              <img
                 className="rounded"
                 src={selectedAssistantImage}
                 alt="Assistant"
@@ -240,7 +234,7 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
         className="min-w-[300px] max-w-[500px] space-y-4"
         align="start"
       >
-        {presets.length === 0 && assistants.length === 0 ? (
+        {presets.length === 0 ? (
           <div className="p-8 text-center">No items found.</div>
         ) : (
           <>
@@ -260,8 +254,8 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
                 item={
                   selectedPreset ||
                   (selectedAssistant as
-                    | Tables<"presets">
-                    | Tables<"assistants">)
+                    | DbModels["Preset"]
+                    | DbModels["Assistant"])
                 }
                 onSelect={() => {
                   handleSelectQuickSetting(null, "remove")
@@ -294,9 +288,9 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
                       ? assistantImages.find(
                           image =>
                             image.path ===
-                            (item as Tables<"assistants">).image_path
-                        )?.base64 || ""
-                      : ""
+                            (item as DbModels["Assistant"])?.imagePath || ''
+                        )?.base64 || ''
+                      : ''
                   }
                 />
               ))}

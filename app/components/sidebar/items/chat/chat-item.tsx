@@ -1,19 +1,18 @@
-import { ModelIcon } from "@/components/models/model-icon"
-import { WithTooltip } from "@/components/ui/with-tooltip"
-import { ChatbotUIContext } from "@/context/context"
-import { LLM_LIST } from "@/lib/models/llm/llm-list"
-import { cn } from "@/lib/utils"
-import { Tables } from "@/supabase/types"
-import { LLM } from "@/types"
+import { ModelIcon } from "#app/components/models/model-icon"
+import { WithTooltip } from "#app/components/ui/with-tooltip"
+import { ChatbotUIContext } from "#app/../context/context"
+import { LLM_LIST } from "#app/lib/models/llm/llm-list"
+import { cn } from '#app/utils/misc.tsx'
+import { DbModels } from "#app/../types/dbModels"
+import { LLM } from "#app/../types"
 import { IconRobotFace } from "@tabler/icons-react"
-import Image from "next/image"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useNavigate } from '@remix-run/react'
 import { FC, useContext, useRef } from "react"
 import { DeleteChat } from "./delete-chat"
 import { UpdateChat } from "./update-chat"
 
 interface ChatItemProps {
-  chat: Tables<"chats">
+  chat: DbModels["Chat"]
 }
 
 export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
@@ -25,7 +24,7 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
     availableOpenRouterModels
   } = useContext(ChatbotUIContext)
 
-  const router = useRouter()
+  const navigate = useNavigate()
   const params = useParams()
   const isActive = params.chatid === chat.id || selectedChat?.id === chat.id
 
@@ -33,7 +32,7 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
 
   const handleClick = () => {
     if (!selectedWorkspace) return
-    return router.push(`/${selectedWorkspace.id}/chat/${chat.id}`)
+    navigate(`/${selectedWorkspace.id}/chat/${chat.id}`)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -50,7 +49,7 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
   ].find(llm => llm.modelId === chat.model) as LLM
 
   const assistantImage = assistantImages.find(
-    image => image.assistantId === chat.assistant_id
+    image => image.assistantId === chat.assistantId
   )?.base64
 
   return (
@@ -64,9 +63,9 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
       onKeyDown={handleKeyDown}
       onClick={handleClick}
     >
-      {chat.assistant_id ? (
+      {chat.assistantId ? (
         assistantImage ? (
-          <Image
+          <img
             style={{ width: "30px", height: "30px" }}
             className="rounded"
             src={assistantImage}

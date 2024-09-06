@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "#app/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -7,18 +7,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "@/components/ui/dialog"
-import { ChatbotUIContext } from "@/context/context"
-import { deleteFolder } from "@/db/folders"
-import { supabase } from "@/lib/supabase/browser-client"
-import { Tables } from "@/supabase/types"
-import { ContentType } from "@/types"
+} from "#app/components/ui/dialog"
+import { ChatbotUIContext } from "#app/../context/context"
+import { deleteFolder } from "#app/utils/folders.server"
+import { DbModels } from "#app/../types/dbModels"
+import { ContentType } from "#app/../types/content-type"
 import { IconTrash } from "@tabler/icons-react"
 import { FC, useContext, useRef, useState } from "react"
 import { toast } from "sonner"
+import { prisma } from '#app/utils/db.server.js'
 
 interface DeleteFolderProps {
-  folder: Tables<"folders">
+  folder: DbModels["Folder"]
   contentType: ContentType
 }
 
@@ -31,11 +31,6 @@ export const DeleteFolder: FC<DeleteFolderProps> = ({
     setFolders,
     setPresets,
     setPrompts,
-    setFiles,
-    setCollections,
-    setAssistants,
-    setTools,
-    setModels
   } = useContext(ChatbotUIContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -46,11 +41,6 @@ export const DeleteFolder: FC<DeleteFolderProps> = ({
     chats: setChats,
     presets: setPresets,
     prompts: setPrompts,
-    files: setFiles,
-    collections: setCollections,
-    assistants: setAssistants,
-    tools: setTools,
-    models: setModels
   }
 
   const handleDeleteFolderOnly = async () => {
@@ -83,21 +73,22 @@ export const DeleteFolder: FC<DeleteFolderProps> = ({
 
     if (!setStateFunction) return
 
-    const { error } = await supabase
-      .from(contentType)
-      .delete()
-      .eq("folder_id", folder.id)
+    const modelName = contentType === 'chats' ? 'chat' : contentType.slice(0, -1);
+    try {
+      await (prisma[modelName as keyof typeof prisma] as any).deleteMany({
+        where: { folder_id: folder.id }
+      })
 
-    if (error) {
-      toast.error(error.message)
+      setStateFunction((prevItems: any) =>
+        prevItems.filter((item: any) => item.folder_id !== folder.id)
+      )
+
+      await handleDeleteFolderOnly()
+    } catch (error) {
+      toast.error("Error deleting items: " + (error as Error).message)
     }
-
-    setStateFunction((prevItems: any) =>
-      prevItems.filter((item: any) => item.folder_id !== folder.id)
-    )
-
-    handleDeleteFolderOnly()
   }
+
 
   return (
     <Dialog open={showFolderDialog} onOpenChange={setShowFolderDialog}>

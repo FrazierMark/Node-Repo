@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "#app/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -6,17 +6,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ChatbotUIContext } from "@/context/context"
-import { updateChat } from "@/db/chats"
-import { Tables } from "@/supabase/types"
+} from "#app/components/ui/dialog"
+import { Input } from "#app/components/ui/input"
+import { Label } from "#app/components/ui/label"
+import { ChatbotUIContext } from "#app/../context/context"
+import { updateChat } from "#app/utils/chats.server"
+import { DbModels } from "#app/../types/dbModels"
 import { IconEdit } from "@tabler/icons-react"
 import { FC, useContext, useRef, useState } from "react"
 
 interface UpdateChatProps {
-  chat: Tables<"chats">
+  chat: DbModels["Chat"]
 }
 
 export const UpdateChat: FC<UpdateChatProps> = ({ chat }) => {
@@ -32,7 +32,7 @@ export const UpdateChat: FC<UpdateChatProps> = ({ chat }) => {
       name
     })
     setChats(prevState =>
-      prevState.map(c => (c.id === chat.id ? updatedChat : c))
+      prevState.map(c => (c.id === chat.id ? { ...c, ...updatedChat } : c))
     )
 
     setShowChatDialog(false)

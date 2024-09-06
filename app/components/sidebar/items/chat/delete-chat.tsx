@@ -1,5 +1,5 @@
-import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
-import { Button } from "@/components/ui/button"
+import { useChatHandler } from "#app/components/chat/chat-hooks/use-chat-handler"
+import { Button } from "#app/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,16 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "@/components/ui/dialog"
-import { ChatbotUIContext } from "@/context/context"
-import { deleteChat } from "@/db/chats"
-import useHotkey from "@/lib/hooks/use-hotkey"
-import { Tables } from "@/supabase/types"
+} from "#app/components/ui/dialog"
+import { ChatbotUIContext } from "#app/../context/context"
+import { deleteChat } from "#app/utils/chats.server"
+import useHotkey from "#app/lib/hooks/use-hotkey"
+import { DbModels } from "#app/../types/dbModels"
 import { IconTrash } from "@tabler/icons-react"
 import { FC, useContext, useRef, useState } from "react"
 
 interface DeleteChatProps {
-  chat: Tables<"chats">
+  chat: DbModels["Chat"]
 }
 
 export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {

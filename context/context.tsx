@@ -18,22 +18,14 @@ interface ChatbotUIContext {
   setProfile: Dispatch<SetStateAction<DbModels["Profile"] | null>>
 
   // ITEMS STORE
-  assistants: DbModels['Assistant'][]
-  setAssistants: Dispatch<SetStateAction<DbModels['Assistant'][]>>
-  collections: DbModels['Collection'][]
-  setCollections: Dispatch<SetStateAction<DbModels["Collection"][]>>
   chats: DbModels['Chat'][]
   setChats: Dispatch<SetStateAction<DbModels['Chat'][]>>
-  files: DbModels['File'][]
-  setFiles: Dispatch<SetStateAction<DbModels['File'][]>>
   folders: DbModels['Folder'][]
   setFolders: Dispatch<SetStateAction<DbModels['Folder'][]>>
   presets: DbModels['Preset'][]
   setPresets: Dispatch<SetStateAction<DbModels['Preset'][]>>
   prompts: DbModels['Prompt'][]
   setPrompts: Dispatch<SetStateAction<DbModels['Prompt'][]>>
-  tools: DbModels['Tool'][]
-  setTools: Dispatch<SetStateAction<DbModels['Tool'][]>>
   workspaces: DbModels['Workspace'][]
   setWorkspaces: Dispatch<SetStateAction<DbModels['Workspace'][]>>
 
@@ -143,22 +135,14 @@ export const ChatbotUIContext = createContext<ChatbotUIContext>({
   setProfile: () => {},
 
   // ITEMS STORE
-  assistants: [],
-  setAssistants: () => {},
-  collections: [],
-  setCollections: () => {},
   chats: [],
   setChats: () => {},
-  files: [],
-  setFiles: () => {},
   folders: [],
   setFolders: () => {},
   presets: [],
   setPresets: () => {},
   prompts: [],
   setPrompts: () => {},
-  tools: [],
-  setTools: () => {},
   workspaces: [],
   setWorkspaces: () => {},
 

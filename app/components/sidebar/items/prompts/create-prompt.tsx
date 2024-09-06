@@ -1,11 +1,11 @@
-import { SidebarCreateItem } from "@/components/sidebar/items/all/sidebar-create-item"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { TextareaAutosize } from "@/components/ui/textarea-autosize"
-import { ChatbotUIContext } from "@/context/context"
-import { PROMPT_NAME_MAX } from "@/db/limits"
-import { TablesInsert } from "@/supabase/types"
+import { SidebarCreateItem } from "#app/components/sidebar/items/all/sidebar-create-item"
+import { Input } from "#app/components/ui/input"
+import { Label } from "#app/components/ui/label"
+import { TextareaAutosize } from "#app/components/ui/textarea-autosize"
+import { ChatbotUIContext } from "#app/../context/context"
+import { PROMPT_NAME_MAX } from '#app/utils/providers/constants'
 import { FC, useContext, useState } from "react"
+import { Prisma } from '@prisma/client'
 
 interface CreatePromptProps {
   isOpen: boolean
@@ -32,10 +32,14 @@ export const CreatePrompt: FC<CreatePromptProps> = ({
       onOpenChange={onOpenChange}
       createState={
         {
-          user_id: profile.user_id,
+          user: {
+            connect: {
+              id: profile.userId
+            }
+          },
           name,
           content
-        } as TablesInsert<"prompts">
+        } as Prisma.PromptCreateInput
       }
       renderInputs={() => (
         <>

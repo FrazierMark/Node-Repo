@@ -1,11 +1,12 @@
-import { SidebarCreateItem } from "@/components/sidebar/items/all/sidebar-create-item"
-import { ChatSettingsForm } from "@/components/ui/chat-settings-form"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ChatbotUIContext } from "@/context/context"
-import { PRESET_NAME_MAX } from "@/db/limits"
-import { TablesInsert } from "@/supabase/types"
+import { SidebarCreateItem } from "#app/components/sidebar/items/all/sidebar-create-item"
+import { ChatSettingsForm } from "#app/components/ui/chat-settings-form"
+import { Input } from "#app/components/ui/input"
+import { Label } from "#app/components/ui/label"
+import { ChatbotUIContext } from "#app/../context/context"
+import { PRESET_NAME_MAX } from "#app/utils/providers/constants"
+import { DbModels } from "#app/../types/dbModels"
 import { FC, useContext, useState } from "react"
+import { Prisma } from '@prisma/client'
 
 interface CreatePresetProps {
   isOpen: boolean
@@ -22,14 +23,14 @@ export const CreatePreset: FC<CreatePresetProps> = ({
   const [isTyping, setIsTyping] = useState(false)
   const [description, setDescription] = useState("")
   const [presetChatSettings, setPresetChatSettings] = useState({
-    model: selectedWorkspace?.default_model,
-    prompt: selectedWorkspace?.default_prompt,
-    temperature: selectedWorkspace?.default_temperature,
-    contextLength: selectedWorkspace?.default_context_length,
-    includeProfileContext: selectedWorkspace?.include_profile_context,
+    model: selectedWorkspace?.defaultModel,
+    prompt: selectedWorkspace?.defaultPrompt,
+    temperature: selectedWorkspace?.defaultTemperature,
+    contextLength: selectedWorkspace?.defaultContextLength,
+    includeProfileContext: selectedWorkspace?.includeProfileContext,
     includeWorkspaceInstructions:
-      selectedWorkspace?.include_workspace_instructions,
-    embeddingsProvider: selectedWorkspace?.embeddings_provider
+      selectedWorkspace?.includeWorkspaceInstructions,
+    embeddingsProvider: selectedWorkspace?.embeddingsProvider
   })
 
   if (!profile) return null
@@ -43,18 +44,17 @@ export const CreatePreset: FC<CreatePresetProps> = ({
       onOpenChange={onOpenChange}
       createState={
         {
-          user_id: profile.user_id,
+          user: { connect: { id: profile.userId } },
           name,
           description,
-          include_profile_context: presetChatSettings.includeProfileContext,
-          include_workspace_instructions:
-            presetChatSettings.includeWorkspaceInstructions,
-          context_length: presetChatSettings.contextLength,
+          includeProfileContext: presetChatSettings.includeProfileContext,
+          includeWorkspaceInstructions: presetChatSettings.includeWorkspaceInstructions,
+          contextLength: presetChatSettings.contextLength,
           model: presetChatSettings.model,
           prompt: presetChatSettings.prompt,
           temperature: presetChatSettings.temperature,
-          embeddings_provider: presetChatSettings.embeddingsProvider
-        } as TablesInsert<"presets">
+          embeddingsProvider: presetChatSettings.embeddingsProvider
+        } as Prisma.PresetCreateInput
       }
       renderInputs={() => (
         <>

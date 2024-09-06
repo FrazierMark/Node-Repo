@@ -1,15 +1,15 @@
-import { ModelIcon } from "@/components/models/model-icon"
-import { ChatSettingsForm } from "@/components/ui/chat-settings-form"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { PRESET_NAME_MAX } from "@/db/limits"
-import { LLM_LIST } from "@/lib/models/llm/llm-list"
-import { Tables } from "@/supabase/types"
+import { ModelIcon } from "#app/components/models/model-icon"
+import { ChatSettingsForm } from "#app/components/ui/chat-settings-form"
+import { Input } from "#app/components/ui/input"
+import { Label } from "#app/components/ui/label"
+import { PRESET_NAME_MAX } from "#app/utils/providers/constants"
+import { LLM_LIST } from "#app/lib/models/llm/llm-list"
+import { DbModels } from "#app/../types/dbModels"
 import { FC, useState } from "react"
 import { SidebarItem } from "../all/sidebar-display-item"
 
 interface PresetItemProps {
-  preset: Tables<"presets">
+  preset: DbModels["Preset"]
 }
 
 export const PresetItem: FC<PresetItemProps> = ({ preset }) => {
@@ -20,9 +20,9 @@ export const PresetItem: FC<PresetItemProps> = ({ preset }) => {
     model: preset.model,
     prompt: preset.prompt,
     temperature: preset.temperature,
-    contextLength: preset.context_length,
-    includeProfileContext: preset.include_profile_context,
-    includeWorkspaceInstructions: preset.include_workspace_instructions
+    contextLength: preset.contextLength,
+    includeProfileContext: preset.includeProfileContext,
+    includeWorkspaceInstructions: preset.includeWorkspaceInstructions
   })
 
   const modelDetails = LLM_LIST.find(model => model.modelId === preset.model)
@@ -42,10 +42,10 @@ export const PresetItem: FC<PresetItemProps> = ({ preset }) => {
       updateState={{
         name,
         description,
-        include_profile_context: presetChatSettings.includeProfileContext,
-        include_workspace_instructions:
+        includeProfileContext: presetChatSettings.includeProfileContext,
+        includeWorkspaceInstructions:
           presetChatSettings.includeWorkspaceInstructions,
-        context_length: presetChatSettings.contextLength,
+        contextLength: presetChatSettings.contextLength,
         model: presetChatSettings.model,
         prompt: presetChatSettings.prompt,
         temperature: presetChatSettings.temperature
