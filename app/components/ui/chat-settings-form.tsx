@@ -1,8 +1,6 @@
-"use client"
-
-import { ChatbotUIContext } from "@/context/context"
-import { CHAT_SETTING_LIMITS } from "@/lib/chat-setting-limits"
-import { ChatSettings } from "@/types"
+import { ChatbotUIContext } from "#app/../context/context"
+import { CHAT_SETTING_LIMITS } from "#app/lib/chat-setting-limits"
+import { ChatSettings } from "#app/../types/chat.ts"
 import { IconInfoCircle } from "@tabler/icons-react"
 import { FC, useContext } from "react"
 import { ModelSelect } from "../models/model-select"
@@ -33,7 +31,7 @@ export const ChatSettingsForm: FC<ChatSettingsFormProps> = ({
   useAdvancedDropdown = true,
   showTooltip = true
 }) => {
-  const { profile, models } = useContext(ChatbotUIContext)
+  const { profile } = useContext(ChatbotUIContext)
 
   if (!profile) return null
 
@@ -97,12 +95,8 @@ const AdvancedContent: FC<AdvancedContentProps> = ({
   onChangeChatSettings,
   showTooltip
 }) => {
-  const { profile, selectedWorkspace, availableOpenRouterModels, models } =
+  const { profile, selectedWorkspace, availableOpenRouterModels } =
     useContext(ChatbotUIContext)
-
-  const isCustomModel = models.some(
-    model => model.model_id === chatSettings.model
-  )
 
   function findOpenRouterModel(modelId: string) {
     return availableOpenRouterModels.find(model => model.modelId === modelId)
@@ -126,7 +120,7 @@ const AdvancedContent: FC<AdvancedContentProps> = ({
 
         <Slider
           value={[chatSettings.temperature]}
-          onValueChange={temperature => {
+          onValueChange={(temperature: any[]) => {
             onChangeChatSettings({
               ...chatSettings,
               temperature: temperature[0]
@@ -147,19 +141,14 @@ const AdvancedContent: FC<AdvancedContentProps> = ({
 
         <Slider
           value={[chatSettings.contextLength]}
-          onValueChange={contextLength => {
+          onValueChange={(contextLength: any[]) => {
             onChangeChatSettings({
               ...chatSettings,
               contextLength: contextLength[0]
             })
           }}
           min={0}
-          max={
-            isCustomModel
-              ? models.find(model => model.model_id === chatSettings.model)
-                  ?.context_length
-              : MODEL_LIMITS.MAX_CONTEXT_LENGTH
-          }
+          max={ MODEL_LIMITS.MAX_CONTEXT_LENGTH }
           step={1}
         />
       </div>
@@ -182,7 +171,7 @@ const AdvancedContent: FC<AdvancedContentProps> = ({
             delayDuration={0}
             display={
               <div className="w-[400px] p-3">
-                {profile?.profile_context || "No profile context."}
+                {profile?.profileContext || "No profile context."}
               </div>
             }
             trigger={
@@ -239,7 +228,7 @@ const AdvancedContent: FC<AdvancedContentProps> = ({
 
           <SelectContent>
             <SelectItem value="openai">
-              {profile?.use_azure_openai ? "Azure OpenAI" : "OpenAI"}
+              {profile?.useAzureOpenai ? "Azure OpenAI" : "OpenAI"}
             </SelectItem>
 
             {window.location.hostname === "localhost" && (

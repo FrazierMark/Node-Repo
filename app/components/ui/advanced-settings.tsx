@@ -2,7 +2,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger
-} from "@/components/ui/collapsible"
+} from "#app/components/ui/collapsible"
 import { IconChevronDown, IconChevronRight } from "@tabler/icons-react"
 import { FC, useState } from "react"
 

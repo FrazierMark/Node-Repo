@@ -1,5 +1,5 @@
 import { ScreenLoader } from '../ui/screen-loader'
-import { useChatHandler } from '../../components/chat/chat-hooks/use-chat-handler'
+import { useChatHandler } from '#app/components/chat/chat-hooks/use-chat-handler'
 import { ChatbotUIContext } from '../../../context/context'
 import { getAssistantToolsByAssistantId } from '../../utils/assistant-tools.server'
 import { getChatFilesByChatId } from '../../utils/chat-files.server'
@@ -18,7 +18,7 @@ import { ChatInput } from './chat-input'
 import { ChatMessages } from './chat-messages'
 import { ChatScrollButtons } from './chat-scroll-buttons'
 import { ChatSecondaryButtons } from './chat-secondary-buttons'
-import { DbModels } from '../../../types/dbModels'
+import { DbModels } from '#app/../types/dbModels'
 
 interface ChatUIProps {}
 

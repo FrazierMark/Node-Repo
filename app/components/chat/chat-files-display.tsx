@@ -1,7 +1,6 @@
 import { ChatbotUIContext } from "../../../context/context"
-import { getFileFromStorage } from "@/db/storage/files"
-import useHotkey from "@/lib/hooks/use-hotkey"
-import { cn } from "@/lib/utils"
+import useHotkey from "#app/lib/hooks/use-hotkey"
+import { cn } from "#app/utils/misc.tsx"
 import { ChatFile, MessageImage } from "../../../types"
 import {
   IconCircleFilled,
@@ -15,7 +14,6 @@ import {
   IconMarkdown,
   IconX
 } from "@tabler/icons-react"
-import Image from "next/image"
 import { FC, useContext, useState } from "react"
 import { Button } from "../ui/button"
 import { FilePreview } from "../ui/file-preview"
@@ -29,7 +27,6 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
   useHotkey("e", () => setUseRetrieval(prev => !prev))
 
   const {
-    files,
     newMessageImages,
     setNewMessageImages,
     newMessageFiles,
@@ -63,14 +60,14 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
 
   const combinedMessageFiles = [...messageImages, ...combinedChatFiles]
 
-  const getLinkAndView = async (file: ChatFile) => {
-    const fileRecord = files.find(f => f.id === file.id)
+  // const getLinkAndView = async (file: ChatFile) => {
+  //   const fileRecord = files.find(f => f.id === file.id)
 
-    if (!fileRecord) return
+  //   if (!fileRecord) return
 
-    const link = await getFileFromStorage(fileRecord.file_path)
-    window.open(link, "_blank")
-  }
+  //   const link = await getFileFromStorage(fileRecord.file_path)
+  //   window.open(link, "_blank")
+  // }
 
   return showFilesDisplay && combinedMessageFiles.length > 0 ? (
     <>
@@ -121,7 +118,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
                 key={index}
                 className="relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl hover:opacity-50"
               >
-                <Image
+                <img
                   className="rounded"
                   // Force the image to be 56px by 56px
                   style={{
@@ -173,10 +170,18 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
                   </div>
                 </div>
               ) : (
+                // <div
+                //   key={file.id}
+                //   className="relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl border-2 px-4 py-3 hover:opacity-50"
+                //   onClick={() => getLinkAndView(file)}
+                // >
                 <div
                   key={file.id}
                   className="relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl border-2 px-4 py-3 hover:opacity-50"
-                  onClick={() => getLinkAndView(file)}
+                  onClick={() => {
+                    setSelectedFile(file)
+                    setShowPreview(true)
+                  }}
                 >
                   <div className="rounded bg-blue-500 p-2">
                     {(() => {

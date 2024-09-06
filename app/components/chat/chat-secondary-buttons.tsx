@@ -1,5 +1,5 @@
-import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
-import { ChatbotUIContext } from "@/context/context"
+import { useChatHandler } from "#app/components/chat/chat-hooks/use-chat-handler"
+import { ChatbotUIContext } from "#app/../context/context"
 import { IconInfoCircle, IconMessagePlus } from "@tabler/icons-react"
 import { FC, useContext } from "react"
 import { WithTooltip } from "../ui/with-tooltip"
@@ -26,24 +26,24 @@ export const ChatSecondaryButtons: FC<ChatSecondaryButtonsProps> = ({}) => {
                   <div>Prompt: {selectedChat.prompt}</div>
 
                   <div>Temperature: {selectedChat.temperature}</div>
-                  <div>Context Length: {selectedChat.context_length}</div>
+                  <div>Context Length: {selectedChat.contextLength}</div>
 
                   <div>
                     Profile Context:{" "}
-                    {selectedChat.include_profile_context
+                    {selectedChat.includeProfileContext
                       ? "Enabled"
                       : "Disabled"}
                   </div>
                   <div>
                     {" "}
                     Workspace Instructions:{" "}
-                    {selectedChat.include_workspace_instructions
+                    {selectedChat.includeWorkspaceInstructions
                       ? "Enabled"
                       : "Disabled"}
                   </div>
 
                   <div>
-                    Embeddings Provider: {selectedChat.embeddings_provider}
+                    Embeddings Provider: {selectedChat.embeddingsProvider}
                   </div>
                 </div>
               </div>

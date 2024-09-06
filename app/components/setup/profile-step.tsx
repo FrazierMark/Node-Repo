@@ -1,10 +1,10 @@
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from "#app/components/ui/input"
+import { Label } from "#app/components/ui/label"
 import {
   PROFILE_DISPLAY_NAME_MAX,
   PROFILE_USERNAME_MAX,
   PROFILE_USERNAME_MIN
-} from "@/db/limits"
+} from "#app/utils/providers/constants"
 import {
   IconCircleCheckFilled,
   IconCircleXFilled,
@@ -77,7 +77,7 @@ export const ProfileStep: FC<ProfileStepProps> = ({
         body: JSON.stringify({ username })
       })
 
-      const data = await response.json()
+      const data = await response.json() as { isAvailable: boolean }
       const isAvailable = data.isAvailable
 
       onUsernameAvailableChange(isAvailable)

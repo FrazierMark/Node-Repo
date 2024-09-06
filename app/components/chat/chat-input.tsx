@@ -1,14 +1,13 @@
-import { ChatbotUIContext } from "@/context/context"
-import useHotkey from "@/lib/hooks/use-hotkey"
-import { LLM_LIST } from "@/lib/models/llm/llm-list"
-import { cn } from "@/lib/utils"
+import { ChatbotUIContext } from "#app/../context/context"
+import useHotkey from "#app/lib/hooks/use-hotkey"
+import { LLM_LIST } from "#app/lib/models/llm/llm-list"
+import { cn } from '#app/utils/misc.tsx'
 import {
   IconBolt,
   IconCirclePlus,
   IconPlayerStopFilled,
   IconSend
 } from "@tabler/icons-react"
-import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -190,12 +189,12 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
 
         {selectedAssistant && (
           <div className="border-primary mx-auto flex w-fit items-center space-x-2 rounded-lg border p-1.5">
-            {selectedAssistant.image_path && (
-              <Image
+            {selectedAssistant.imagePath && (
+              <img
                 className="rounded"
                 src={
                   assistantImages.find(
-                    img => img.path === selectedAssistant.image_path
+                    img => img.path === selectedAssistant.imagePath
                   )?.base64
                 }
                 width={28}
@@ -223,17 +222,6 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
             onClick={() => fileInputRef.current?.click()}
           />
 
-          {/* Hidden input to select files from device */}
-          <Input
-            ref={fileInputRef}
-            className="hidden"
-            type="file"
-            onChange={e => {
-              if (!e.target.files) return
-              handleSelectDeviceFile(e.target.files[0])
-            }}
-            accept={filesToAccept}
-          />
         </>
 
         <TextareaAutosize

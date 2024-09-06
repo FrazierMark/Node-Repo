@@ -1,6 +1,6 @@
-import { ChatbotUIContext } from "@/context/context"
+import { ChatbotUIContext } from "#app/../context/context"
 import { IconAdjustmentsHorizontal } from "@tabler/icons-react"
-import { FC, useContext, useState } from "react"
+import { FC, SetStateAction, useContext, useState } from "react"
 import { Button } from "../ui/button"
 import {
   Dialog,
@@ -45,8 +45,8 @@ export const ChatRetrievalSettings: FC<ChatRetrievalSettingsProps> = ({}) => {
 
           <Slider
             value={[sourceCount]}
-            onValueChange={values => {
-              setSourceCount(values[0])
+            onValueChange={(values: number[]) => {
+              setSourceCount(values[0] ?? sourceCount)
             }}
             min={1}
             max={10}

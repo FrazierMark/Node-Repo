@@ -1,13 +1,13 @@
-import { cn } from "@/lib/utils"
-import { Tables } from "@/supabase/types"
-import { ContentType } from "@/types"
+import { cn } from '#app/utils/misc.tsx'
+import { DbModels } from "#app/../types/dbModels"
+import { ContentType } from "#app/../types/content-type"
 import { IconChevronDown, IconChevronRight } from "@tabler/icons-react"
 import { FC, useRef, useState } from "react"
 import { DeleteFolder } from "./delete-folder"
 import { UpdateFolder } from "./update-folder"
 
 interface FolderProps {
-  folder: Tables<"folders">
+  folder: DbModels["Folder"]
   contentType: ContentType
   children: React.ReactNode
   onUpdateFolder: (itemId: string, folderId: string | null) => void

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "#app/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -6,17 +6,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ChatbotUIContext } from "@/context/context"
-import { updateFolder } from "@/db/folders"
-import { Tables } from "@/supabase/types"
+} from "#app/components/ui/dialog"
+import { Input } from "#app/components/ui/input"
+import { Label } from "#app/components/ui/label"
+import { ChatbotUIContext } from "#app/../context/context"
+import { updateFolder } from "#app/utils/folders.server"
+import { DbModels } from "#app/../types/dbModels"
 import { IconEdit } from "@tabler/icons-react"
 import { FC, useContext, useRef, useState } from "react"
 
 interface UpdateFolderProps {
-  folder: Tables<"folders">
+  folder: DbModels["Folder"]
 }
 
 export const UpdateFolder: FC<UpdateFolderProps> = ({ folder }) => {
@@ -32,7 +32,7 @@ export const UpdateFolder: FC<UpdateFolderProps> = ({ folder }) => {
       name
     })
     setFolders(prevState =>
-      prevState.map(c => (c.id === folder.id ? updatedFolder : c))
+      prevState.map(c => (c.id === folder.id ? updatedFolder as typeof c : c))
     )
 
     setShowFolderDialog(false)

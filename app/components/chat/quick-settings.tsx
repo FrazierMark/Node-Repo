@@ -2,14 +2,14 @@ import { ChatbotUIContext } from "#app/../context/context"
 import { getAssistantCollectionsByAssistantId } from "#app/utils/assistant-collections.server"
 import { getAssistantFilesByAssistantId } from "#app/utils/assistant-files.server"
 import { getAssistantToolsByAssistantId } from "#app/utils/assistant-tools.server"
-import { getCollectionFilesByCollectionId } from "@/db/collection-files"
+import { getCollectionFilesByCollectionId } from "#app/utils/collection-files.server"
 import useHotkey from "#app/lib/hooks/use-hotkey"
 import { LLM_LIST } from "#app/lib/models/llm/llm-list"
 import { DbModels } from "#app/../types/dbModels"
 import { LLMID } from "#app/../types"
 import { IconChevronDown, IconRobotFace } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
-import { useTranslation } from "remix-i18next"
+import { useTranslation } from "react-i18next";
 import { ModelIcon } from "../models/model-icon"
 import { Button } from "../ui/button"
 import {
@@ -80,6 +80,7 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
       }
       const assistantTools = (await getAssistantToolsByAssistantId(item.id))
         .tools
+        // @ts-expect-error Temporarily ignoring type mismatch until we update the types
       setSelectedTools(assistantTools)
       setChatFiles(
         allFiles.map(file => ({
@@ -288,9 +289,9 @@ export const QuickSettings: FC<QuickSettingsProps> = ({}) => {
                       ? assistantImages.find(
                           image =>
                             image.path ===
-                            (item as DbModels["Assistant"])?.imagePath || ''
-                        )?.base64 || ''
-                      : ''
+                            (item as any).image_path
+                        )?.base64 || ""
+                      : ""
                   }
                 />
               ))}

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "#app/components/ui/button"
 import {
   Card,
   CardContent,
@@ -6,7 +6,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle
-} from "@/components/ui/card"
+} from "#app/components/ui/card"
 import { FC, useRef } from "react"
 
 export const SETUP_STEP_COUNT = 3
