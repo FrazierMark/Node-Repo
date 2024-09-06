@@ -27,10 +27,10 @@ const ICON_SIZE = 32
 
 interface MessageProps {
   message: DbModels["Message"]
-  fileItems: Tables<"file_items">[]
+  fileItems: DbModels["FileItem"][]
   isEditing: boolean
   isLast: boolean
-  onStartEdit: (message: DbModels["messages"]) => void
+  onStartEdit: (message: DbModels["Message"]) => void
   onCancelEdit: () => void
   onSubmitEdit: (value: string, sequenceNumber: number) => void
 }
@@ -45,7 +45,6 @@ export const Message: FC<MessageProps> = ({
   onSubmitEdit
 }) => {
   const {
-    assistants,
     profile,
     isGenerating,
     setIsGenerating,
@@ -57,7 +56,6 @@ export const Message: FC<MessageProps> = ({
     chatImages,
     assistantImages,
     toolInUse,
-    files,
     models
   } = useContext(ChatbotUIContext)
 
@@ -73,7 +71,7 @@ export const Message: FC<MessageProps> = ({
 
   const [showFileItemPreview, setShowFileItemPreview] = useState(false)
   const [selectedFileItem, setSelectedFileItem] =
-    useState<Tables<"file_items"> | null>(null)
+    useState<DbModels["FileItem"] | null>(null)
 
   const [viewSources, setViewSources] = useState(false)
 
@@ -92,7 +90,7 @@ export const Message: FC<MessageProps> = ({
   }
 
   const handleSendEdit = () => {
-    onSubmitEdit(editedMessage, message.sequence_number)
+    onSubmitEdit(editedMessage, message.sequenceNumber)
     onCancelEdit()
   }
 
@@ -140,11 +138,11 @@ export const Message: FC<MessageProps> = ({
   ].find(llm => llm.modelId === message.model) as LLM
 
   const messageAssistantImage = assistantImages.find(
-    image => image.assistantId === message.assistant_id
+    image => image.assistantId === message.assistantId
   )?.base64
 
   const selectedAssistantImage = assistantImages.find(
-    image => image.path === selectedAssistant?.image_path
+    image => image.path === selectedAssistant?.imagePath
   )?.base64
 
   const modelDetails = LLM_LIST.find(model => model.modelId === message.model)
@@ -161,7 +159,7 @@ export const Message: FC<MessageProps> = ({
   > = {}
 
   const fileSummary = fileItems.reduce((acc, fileItem) => {
-    const parentFile = files.find(file => file.id === fileItem.file_id)
+    const parentFile = files.find(file => file.id === fileItem.fileId)
     if (parentFile) {
       if (!acc[parentFile.id]) {
         acc[parentFile.id] = {
@@ -214,7 +212,7 @@ export const Message: FC<MessageProps> = ({
             <div className="flex items-center space-x-3">
               {message.role === "assistant" ? (
                 messageAssistantImage ? (
-                  <Image
+                  <img
                     style={{
                       width: `${ICON_SIZE}px`,
                       height: `${ICON_SIZE}px`
@@ -237,10 +235,10 @@ export const Message: FC<MessageProps> = ({
                     }
                   />
                 )
-              ) : profile?.image_url ? (
-                <Image
+              ) : profile?.imageUrl ? (
+                <img
                   className={`size-[32px] rounded`}
-                  src={profile?.image_url}
+                  src={profile?.imageUrl}
                   height={32}
                   width={32}
                   alt="user image"
@@ -254,9 +252,9 @@ export const Message: FC<MessageProps> = ({
 
               <div className="font-semibold">
                 {message.role === "assistant"
-                  ? message.assistant_id
+                  ? message.assistantId
                     ? assistants.find(
-                        assistant => assistant.id === message.assistant_id
+                        assistant => assistant.id === message.assistantId
                       )?.name
                     : selectedAssistant
                       ? selectedAssistant?.name

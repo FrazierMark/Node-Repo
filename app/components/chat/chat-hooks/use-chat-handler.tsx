@@ -44,6 +44,7 @@ export const useChatHandler = () => {
     setSelectedTools,
     availableLocalModels,
     availableOpenRouterModels,
+    models,
     abortController,
     setAbortController,
     chatSettings,
@@ -206,7 +207,7 @@ export const useChatHandler = () => {
       setAbortController(newAbortController)
 
       const modelData = [
-        ...models.map(model => ({
+        ...(models || []).map(model => ({
           modelId: model.model_id as LLMID,
           modelName: model.name,
           provider: "custom" as ModelProvider,
