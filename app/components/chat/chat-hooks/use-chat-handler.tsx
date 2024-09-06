@@ -1,16 +1,19 @@
-import { ChatbotUIContext } from "@/context/context"
-import { getAssistantCollectionsByAssistantId } from "@/db/assistant-collections"
-import { getAssistantFilesByAssistantId } from "@/db/assistant-files"
-import { getAssistantToolsByAssistantId } from "@/db/assistant-tools"
-import { updateChat } from "@/db/chats"
-import { getCollectionFilesByCollectionId } from "@/db/collection-files"
-import { deleteMessagesIncludingAndAfter } from "@/db/messages"
-import { buildFinalMessages } from "@/lib/build-prompt"
-import { Tables } from "@/supabase/types"
-import { ChatMessage, ChatPayload, LLMID, ModelProvider } from "@/types"
-import { useRouter } from "next/navigation"
+import { ChatbotUIContext } from "#app/../context/context"
+import { getAssistantCollectionsByAssistantId } from "#app/utils/assistant-collections.server"
+import { getAssistantFilesByAssistantId } from "#app/utils/assistant-files.server"
+import { getAssistantToolsByAssistantId } from "#app/utils/assistant-tools.server"
+import { updateChat } from "#app/utils/chats.server"
+import { getCollectionFilesByCollectionId } from "#app/utils/collection-files.server"
+import { deleteMessagesIncludingAndAfter } from "#app/utils/messages.server"
+import { buildFinalMessages } from "#app/lib/build-prompts"
+import { DbModels } from "#app/../types/dbModels"
+import { ChatMessage } from "#app/../types/chat-message"
+import { ModelProvider } from "#app/../types/models"
+import { LLMID } from '#app/../types/llms'
+import { ChatPayload } from "#app/../types/chat"
+import { useNavigate } from "@remix-run/react"
 import { useContext, useEffect, useRef } from "react"
-import { LLM_LIST } from "../../../lib/models/llm/llm-list"
+import { LLM_LIST } from "#app/lib/models/llm/llm-list"
 import {
   createTempMessages,
   handleCreateChat,
@@ -23,7 +26,7 @@ import {
 } from "../chat-helpers"
 
 export const useChatHandler = () => {
-  const router = useRouter()
+  const navigate = useNavigate()
 
   const {
     userInput,
@@ -63,7 +66,6 @@ export const useChatHandler = () => {
     selectedTools,
     selectedPreset,
     setChatSettings,
-    models,
     isPromptPickerOpen,
     isFilePickerOpen,
     isToolPickerOpen
@@ -104,11 +106,11 @@ export const useChatHandler = () => {
         model: selectedAssistant.model as LLMID,
         prompt: selectedAssistant.prompt,
         temperature: selectedAssistant.temperature,
-        contextLength: selectedAssistant.context_length,
-        includeProfileContext: selectedAssistant.include_profile_context,
+        contextLength: selectedAssistant.contextLength,
+        includeProfileContext: selectedAssistant.includeProfileContext,
         includeWorkspaceInstructions:
-          selectedAssistant.include_workspace_instructions,
-        embeddingsProvider: selectedAssistant.embeddings_provider as
+          selectedAssistant.includeWorkspaceInstructions,
+        embeddingsProvider: selectedAssistant.embeddingsProvider as
           | "openai"
           | "local"
       })
@@ -128,11 +130,9 @@ export const useChatHandler = () => {
         ).files
         allFiles = [...allFiles, ...collectionFiles]
       }
-      const assistantTools = (
-        await getAssistantToolsByAssistantId(selectedAssistant.id)
-      ).tools
+      
 
-      setSelectedTools(assistantTools)
+      
       setChatFiles(
         allFiles.map(file => ({
           id: file.id,
@@ -148,11 +148,11 @@ export const useChatHandler = () => {
         model: selectedPreset.model as LLMID,
         prompt: selectedPreset.prompt,
         temperature: selectedPreset.temperature,
-        contextLength: selectedPreset.context_length,
-        includeProfileContext: selectedPreset.include_profile_context,
+        contextLength: selectedPreset.contextLength,
+        includeProfileContext: selectedPreset.includeProfileContext,
         includeWorkspaceInstructions:
-          selectedPreset.include_workspace_instructions,
-        embeddingsProvider: selectedPreset.embeddings_provider as
+          selectedPreset.includeWorkspaceInstructions,
+        embeddingsProvider: selectedPreset.embeddingsProvider as
           | "openai"
           | "local"
       })
@@ -175,7 +175,7 @@ export const useChatHandler = () => {
       // })
     }
 
-    return router.push(`/${selectedWorkspace.id}/chat`)
+    return navigate(`/${selectedWorkspace.id}/chat`)
   }
 
   const handleFocusChatInput = () => {
@@ -231,7 +231,7 @@ export const useChatHandler = () => {
 
       const b64Images = newMessageImages.map(image => image.base64)
 
-      let retrievedFileItems: Tables<"file_items">[] = []
+      let retrievedFileItems: DbModels["FileItem"][] = []
 
       if (
         (newMessageFiles.length > 0 || chatFiles.length > 0) &&
@@ -265,7 +265,7 @@ export const useChatHandler = () => {
         chatMessages: isRegeneration
           ? [...chatMessages]
           : [...chatMessages, tempUserChatMessage],
-        assistant: selectedChat?.assistant_id ? selectedAssistant : null,
+        assistant: selectedChat?.assistantId ? selectedAssistant : null,
         messageFileItems: retrievedFileItems,
         chatFileItems: chatFileItems
       }
@@ -352,7 +352,7 @@ export const useChatHandler = () => {
         )
       } else {
         const updatedChat = await updateChat(currentChat.id, {
-          updated_at: new Date().toISOString()
+          updatedAt: new Date().toISOString()
         })
 
         setChats(prevChats => {
@@ -396,13 +396,13 @@ export const useChatHandler = () => {
     if (!selectedChat) return
 
     await deleteMessagesIncludingAndAfter(
-      selectedChat.user_id,
+      selectedChat.userId,
       selectedChat.id,
       sequenceNumber
     )
 
     const filteredMessages = chatMessages.filter(
-      chatMessage => chatMessage.message.sequence_number < sequenceNumber
+      chatMessage => chatMessage.message.sequenceNumber < sequenceNumber
     )
 
     setChatMessages(filteredMessages)

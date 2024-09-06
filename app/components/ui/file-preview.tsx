@@ -1,15 +1,14 @@
-import { cn } from "@/lib/utils"
-import { Tables } from "@/supabase/types"
-import { ChatFile, MessageImage } from "@/types"
+import { cn } from '#app/utils/misc.tsx'
+import { DbModels } from '#app/../types/dbModels'
+import { ChatFile, MessageImage } from "#app/../types"
 import { IconFileFilled } from "@tabler/icons-react"
-import Image from "next/image"
 import { FC } from "react"
 import { DrawingCanvas } from "../utility/drawing-canvas"
 import { Dialog, DialogContent } from "./dialog"
 
 interface FilePreviewProps {
   type: "image" | "file" | "file_item"
-  item: ChatFile | MessageImage | Tables<"file_items">
+  item: ChatFile | MessageImage | DbModels["FileItem"]
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
 }
@@ -35,7 +34,7 @@ export const FilePreview: FC<FilePreviewProps> = ({
             return imageItem.file ? (
               <DrawingCanvas imageItem={imageItem} />
             ) : (
-              <Image
+              <img
                 className="rounded"
                 src={imageItem.base64 || imageItem.url}
                 alt="File image"
@@ -48,7 +47,7 @@ export const FilePreview: FC<FilePreviewProps> = ({
               />
             )
           } else if (type === "file_item") {
-            const fileItem = item as Tables<"file_items">
+            const fileItem = item as DbModels["FileItem"]
             return (
               <div className="bg-background text-primary h-[50vh] min-w-[700px] overflow-auto whitespace-pre-wrap rounded-xl p-4">
                 <div>{fileItem.content}</div>

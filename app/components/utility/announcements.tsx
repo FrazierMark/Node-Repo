@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "#app/components/ui/button"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from "@/components/ui/popover"
-import { Announcement } from "@/types/announcement"
+} from "#app/components/ui/popover"
+import { Announcement } from "#app/../types/announcement"
 import { IconExternalLink, IconSpeakerphone } from "@tabler/icons-react"
 import { FC, useEffect, useState } from "react"
 import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"

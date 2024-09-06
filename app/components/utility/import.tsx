@@ -1,11 +1,7 @@
-import { ChatbotUIContext } from "@/context/context"
-import { createAssistants } from "@/db/assistants"
-import { createChats } from "@/db/chats"
-import { createCollections } from "@/db/collections"
-import { createFiles } from "@/db/files"
-import { createPresets } from "@/db/presets"
-import { createPrompts } from "@/db/prompts"
-import { createTools } from "@/db/tools"
+import { ChatbotUIContext } from "#app/../context/context"
+import { createChats } from "#app/utils/chats.server"
+import { createPresets } from "#app/utils/presets.server"
+import { createPrompts } from "#app/utils/prompts.server"
 import { IconUpload, IconX } from "@tabler/icons-react"
 import { FC, useContext, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -30,10 +26,6 @@ export const Import: FC<ImportProps> = ({}) => {
     setChats,
     setPresets,
     setPrompts,
-    setFiles,
-    setCollections,
-    setAssistants,
-    setTools
   } = useContext(ChatbotUIContext)
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -63,10 +55,6 @@ export const Import: FC<ImportProps> = ({}) => {
     chats: setChats,
     presets: setPresets,
     prompts: setPrompts,
-    files: setFiles,
-    collections: setCollections,
-    assistants: setAssistants,
-    tools: setTools
   }
 
   const handleSelectFiles = async (e: any) => {
@@ -93,7 +81,7 @@ export const Import: FC<ImportProps> = ({}) => {
         const newState = [...prevState, ...flatResults]
         uniqueResults = Array.from(
           new Set(newState.map(item => JSON.stringify(item)))
-        ).map(item => JSON.parse(item))
+        ).map(item => JSON.parse(item) as Record<string, any>)
         return uniqueResults
       })
 
@@ -159,7 +147,7 @@ export const Import: FC<ImportProps> = ({}) => {
 
     importList.forEach(item => {
       const { contentType, ...itemWithoutContentType } = item
-      itemWithoutContentType.user_id = profile.user_id
+      itemWithoutContentType.user_id = profile.userId
       itemWithoutContentType.workspace_id = selectedWorkspace.id
       saveData[contentType].push(itemWithoutContentType)
     })
@@ -168,16 +156,6 @@ export const Import: FC<ImportProps> = ({}) => {
       chats: await createChats(saveData.chats),
       presets: await createPresets(saveData.presets, selectedWorkspace.id),
       prompts: await createPrompts(saveData.prompts, selectedWorkspace.id),
-      files: await createFiles(saveData.files, selectedWorkspace.id),
-      collections: await createCollections(
-        saveData.collections,
-        selectedWorkspace.id
-      ),
-      assistants: await createAssistants(
-        saveData.assistants,
-        selectedWorkspace.id
-      ),
-      tools: await createTools(saveData.tools, selectedWorkspace.id)
     }
 
     Object.keys(createdItems).forEach(key => {

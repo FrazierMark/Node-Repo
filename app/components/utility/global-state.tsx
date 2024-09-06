@@ -1,11 +1,7 @@
 // TODO: Separate into multiple contexts, keeping simple for now
-
-"use client"
-
-import { ChatbotUIContext } from "@/context/context"
-import { getProfileByUserId } from "@/db/profile"
-import { getWorkspaceImageFromStorage } from "@/db/storage/workspace-images"
-import { getWorkspacesByUserId } from "@/db/workspaces"
+import { ChatbotUIContext } from "#app/../context/context"
+import { getProfileByUserId } from "#app/utils/profile.server"
+import { getWorkspacesByUserId } from "#app/utils/workspaces.server"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import {
   fetchHostedModels,

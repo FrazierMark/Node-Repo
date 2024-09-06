@@ -1,44 +1,38 @@
-import { Dashboard } from "../../components/ui/dashboard"
-import { ChatbotUIContext } from "../../../context/context"
-import { getAssistantWorkspacesByWorkspaceId } from "@/db/assistants"
-import { getChatsByWorkspaceId } from "@/db/chats"
-import { getCollectionWorkspacesByWorkspaceId } from "@/db/collections"
-import { getFileWorkspacesByWorkspaceId } from "@/db/files"
-import { getFoldersByWorkspaceId } from "@/db/folders"
-import { getPresetWorkspacesByWorkspaceId } from "@/db/presets"
-import { getPromptWorkspacesByWorkspaceId } from "@/db/prompts"
-import { getAssistantImageFromStorage } from "@/db/storage/assistant-images"
-import { getToolWorkspacesByWorkspaceId } from "@/db/tools"
-import { getWorkspaceById } from "@/db/workspaces"
-import { convertBlobToBase64 } from "@/lib/blob-to-b64"
-import { supabase } from "@/lib/supabase/browser-client"
+import { Dashboard } from "#app/components/ui/dashboard"
+import { ChatbotUIContext } from "#app/../context/context"
+import { getAssistantWorkspacesByWorkspaceId } from "#app/utils/assistants.server"
+import { getChatsByWorkspaceId } from "#app/utils/chats.server"
+import { getCollectionWorkspacesByWorkspaceId } from "#app/utils/collections.server"
+import { getFoldersByWorkspaceId } from "#app/utils/folders.server"
+import { getPresetWorkspacesByWorkspaceId } from "#app/utils/presets.server"
+import { getPromptWorkspacesByWorkspaceId } from "#app/utils/prompts.server"
+import { getToolWorkspacesByWorkspaceId } from "#app/utils/tools.server"
+import { getWorkspaceById } from "#app/utils/workspaces.server"
+import { convertBlobToBase64 } from "#app/lib/blob-to-b64"
 import { LLMID } from "../../../types"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useNavigation, useParams, useSearchParams, useNavigate } from '@remix-run/react'
 import { ReactNode, useContext, useEffect, useState } from "react"
-import Loading from "../loading"
+import { ScreenLoader } from "#app/components/ui/screen-loader"
+import { getUserId } from '#app/utils/auth.server.ts'
 
 interface WorkspaceLayoutProps {
   children: ReactNode
 }
 
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
-  const router = useRouter()
+  const navigate = useNavigate()
 
   const params = useParams()
-  const searchParams = useSearchParams()
+  const [searchParams] = useSearchParams()
   const workspaceId = params.workspaceid as string
 
   const {
     setChatSettings,
-    setAssistants,
     setAssistantImages,
     setChats,
-    setCollections,
     setFolders,
-    setFiles,
     setPresets,
     setPrompts,
-    setTools,
     selectedWorkspace,
     setSelectedWorkspace,
     setSelectedChat,
@@ -55,16 +49,22 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    ;(async () => {
-      const session = (await supabase.auth.getSession()).data.session
+  async function checkSession(request: Request) {
+    const userId = await getUserId(request)
+    if (!userId) {
+      return navigate('/login')
+    }
+    return userId
+  }
 
-      if (!session) {
-        return router.push("/login")
-      } else {
+  useEffect(() => {
+    const checkSessionAndFetchData = async () => {
+      const userId = await checkSession(new Request(window.location.href))
+      if (userId) {
         await fetchWorkspaceData(workspaceId)
       }
-    })()
+    }
+    checkSessionAndFetchData()
   }, [])
 
   useEffect(() => {
@@ -88,88 +88,41 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setLoading(true)
 
     const workspace = await getWorkspaceById(workspaceId)
-    setSelectedWorkspace(workspace)
-
-    const assistantData = await getAssistantWorkspacesByWorkspaceId(workspaceId)
-    setAssistants(assistantData.assistants)
-
-    for (const assistant of assistantData.assistants) {
-      let url = ""
-
-      if (assistant.image_path) {
-        url = (await getAssistantImageFromStorage(assistant.image_path)) || ""
-      }
-
-      if (url) {
-        const response = await fetch(url)
-        const blob = await response.blob()
-        const base64 = await convertBlobToBase64(blob)
-
-        setAssistantImages(prev => [
-          ...prev,
-          {
-            assistantId: assistant.id,
-            path: assistant.image_path,
-            base64,
-            url
-          }
-        ])
-      } else {
-        setAssistantImages(prev => [
-          ...prev,
-          {
-            assistantId: assistant.id,
-            path: assistant.image_path,
-            base64: "",
-            url
-          }
-        ])
-      }
-    }
+    setSelectedWorkspace(workspace as any)
 
     const chats = await getChatsByWorkspaceId(workspaceId)
-    setChats(chats)
-
-    const collectionData =
-      await getCollectionWorkspacesByWorkspaceId(workspaceId)
-    setCollections(collectionData.collections)
+    setChats(chats as any)
 
     const folders = await getFoldersByWorkspaceId(workspaceId)
-    setFolders(folders)
-
-    const fileData = await getFileWorkspacesByWorkspaceId(workspaceId)
-    setFiles(fileData.files)
+    setFolders(folders as any)
 
     const presetData = await getPresetWorkspacesByWorkspaceId(workspaceId)
-    setPresets(presetData.presets)
-
+    setPresets(presetData.PresetWorkspace.map(item => item.preset) as any)
+    
     const promptData = await getPromptWorkspacesByWorkspaceId(workspaceId)
-    setPrompts(promptData.prompts)
-
-    const toolData = await getToolWorkspacesByWorkspaceId(workspaceId)
-    setTools(toolData.tools)
+    setPrompts(promptData.PromptWorkspace.map(item => item.prompt) as any)
 
     setChatSettings({
       model: (searchParams.get("model") ||
-        workspace?.default_model ||
+        workspace?.defaultModel ||
         "gpt-4-1106-preview") as LLMID,
       prompt:
-        workspace?.default_prompt ||
+        workspace?.defaultPrompt ||
         "You are a friendly, helpful AI assistant.",
-      temperature: workspace?.default_temperature || 0.5,
-      contextLength: workspace?.default_context_length || 4096,
-      includeProfileContext: workspace?.include_profile_context || true,
+      temperature: workspace?.defaultTemperature || 0.5,
+      contextLength: workspace?.defaultContextLength || 4096,
+      includeProfileContext: workspace?.includeProfileContext || true,
       includeWorkspaceInstructions:
-        workspace?.include_workspace_instructions || true,
+        workspace?.includeWorkspaceInstructions || true,
       embeddingsProvider:
-        (workspace?.embeddings_provider as "openai" | "local") || "openai"
+        (workspace?.embeddingsProvider as "openai" | "local") || "openai"
     })
 
     setLoading(false)
   }
 
   if (loading) {
-    return <Loading />
+    return <ScreenLoader />
   }
 
   return <Dashboard>{children}</Dashboard>

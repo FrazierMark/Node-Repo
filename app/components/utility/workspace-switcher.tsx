@@ -1,21 +1,21 @@
 "use client"
 
-import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
+import { useChatHandler } from "#app/components/chat/chat-hooks/use-chat-handler"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from "@/components/ui/popover"
-import { ChatbotUIContext } from "@/context/context"
-import { createWorkspace } from "@/db/workspaces"
-import useHotkey from "@/lib/hooks/use-hotkey"
+} from "#app/components/ui/popover"
+import { ChatbotUIContext } from "#app/../context/context"
+import { createWorkspace } from "#app/utils/workspaces.server"
+import useHotkey from "#app/lib/hooks/use-hotkey"
 import { IconBuilding, IconHome, IconPlus } from "@tabler/icons-react"
 import { ChevronsUpDown } from "lucide-react"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useNavigate } from "@remix-run/react"
 import { FC, useContext, useEffect, useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
+import { DbModels } from "#app/../types/dbModels"
 
 interface WorkspaceSwitcherProps {}
 
@@ -32,7 +32,7 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
 
   const { handleNewChat } = useChatHandler()
 
-  const router = useRouter()
+  const navigate = useNavigate()
 
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState("")
@@ -48,26 +48,28 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
     if (!selectedWorkspace) return
 
     const createdWorkspace = await createWorkspace({
-      user_id: selectedWorkspace.user_id,
-      default_context_length: selectedWorkspace.default_context_length,
-      default_model: selectedWorkspace.default_model,
-      default_prompt: selectedWorkspace.default_prompt,
-      default_temperature: selectedWorkspace.default_temperature,
+      userId: selectedWorkspace.userId,
+      defaultContextLength: selectedWorkspace.defaultContextLength,
+      defaultModel: selectedWorkspace.defaultModel,
+      defaultPrompt: selectedWorkspace.defaultPrompt,
+      defaultTemperature: selectedWorkspace.defaultTemperature,
       description: "",
-      embeddings_provider: "openai",
-      include_profile_context: selectedWorkspace.include_profile_context,
-      include_workspace_instructions:
-        selectedWorkspace.include_workspace_instructions,
+      embeddingsProvider: "openai",
+      sharing: "private",
+      imagePath: "",
+      includeProfileContext: selectedWorkspace.includeProfileContext,
+      includeWorkspaceInstructions:
+        selectedWorkspace.includeWorkspaceInstructions,
       instructions: selectedWorkspace.instructions,
-      is_home: false,
+      isHome: false,
       name: "New Workspace"
     })
 
-    setWorkspaces([...workspaces, createdWorkspace])
-    setSelectedWorkspace(createdWorkspace)
+    setWorkspaces(prevWorkspaces => [...prevWorkspaces, createdWorkspace as DbModels["Workspace"]])
+    setSelectedWorkspace(createdWorkspace as DbModels["Workspace"])
     setOpen(false)
 
-    return router.push(`/${createdWorkspace.id}/chat`)
+    return navigate(`/${createdWorkspace.id}/chat`)
   }
 
   const getWorkspaceName = (workspaceId: string) => {
@@ -86,7 +88,7 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
     setSelectedWorkspace(workspace)
     setOpen(false)
 
-    return router.push(`/${workspace.id}/chat`)
+    return navigate(`/${workspace.id}/chat`)
   }
 
   const workspaceImage = workspaceImages.find(
@@ -94,11 +96,11 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
   )
   const imageSrc = workspaceImage
     ? workspaceImage.url
-    : selectedWorkspace?.is_home
+    : selectedWorkspace?.isHome
       ? ""
       : ""
 
-  const IconComponent = selectedWorkspace?.is_home ? IconHome : IconBuilding
+  const IconComponent = selectedWorkspace?.isHome ? IconHome : IconBuilding
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -110,7 +112,7 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
           {selectedWorkspace && (
             <div className="flex items-center">
               {workspaceImage ? (
-                <Image
+                <img
                   style={{ width: "22px", height: "22px" }}
                   className="mr-2 rounded"
                   src={imageSrc}
@@ -150,7 +152,7 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
 
           <div className="flex flex-col space-y-1">
             {workspaces
-              .filter(workspace => workspace.is_home)
+              .filter(workspace => workspace.isHome)
               .map(workspace => {
                 const image = workspaceImages.find(
                   image => image.workspaceId === workspace.id
@@ -164,7 +166,7 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
                     onClick={() => handleSelect(workspace.id)}
                   >
                     {image ? (
-                      <Image
+                      <img
                         style={{ width: "28px", height: "28px" }}
                         className="mr-3 rounded"
                         src={image.url || ""}
@@ -186,7 +188,7 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
             {workspaces
               .filter(
                 workspace =>
-                  !workspace.is_home &&
+                  !workspace.isHome &&
                   workspace.name.toLowerCase().includes(search.toLowerCase())
               )
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -203,7 +205,7 @@ export const WorkspaceSwitcher: FC<WorkspaceSwitcherProps> = ({}) => {
                     onClick={() => handleSelect(workspace.id)}
                   >
                     {image ? (
-                      <Image
+                      <img
                         style={{ width: "28px", height: "28px" }}
                         className="mr-3 rounded"
                         src={image.url || ""}

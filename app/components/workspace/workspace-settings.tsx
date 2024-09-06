@@ -1,12 +1,8 @@
-import { ChatbotUIContext } from "@/context/context"
-import { WORKSPACE_INSTRUCTIONS_MAX } from "@/db/limits"
-import {
-  getWorkspaceImageFromStorage,
-  uploadWorkspaceImage
-} from "@/db/storage/workspace-images"
-import { updateWorkspace } from "@/db/workspaces"
-import { convertBlobToBase64 } from "@/lib/blob-to-b64"
-import { LLMID } from "@/types"
+import { ChatbotUIContext } from "#app/../context/context"
+import { WORKSPACE_INSTRUCTIONS_MAX } from "#app/utils/providers/constants"
+import { updateWorkspace } from "#app/utils/workspaces.server"
+import { convertBlobToBase64 } from "#app/lib/blob-to-b64"
+import { LLMID } from "#app/../types/llms"
 import { IconHome, IconSettings } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -56,20 +52,20 @@ export const WorkspaceSettings: FC<WorkspaceSettingsProps> = ({}) => {
   )
 
   const [defaultChatSettings, setDefaultChatSettings] = useState({
-    model: selectedWorkspace?.default_model,
-    prompt: selectedWorkspace?.default_prompt,
-    temperature: selectedWorkspace?.default_temperature,
-    contextLength: selectedWorkspace?.default_context_length,
-    includeProfileContext: selectedWorkspace?.include_profile_context,
+    model: selectedWorkspace?.defaultModel,
+    prompt: selectedWorkspace?.defaultPrompt,
+    temperature: selectedWorkspace?.defaultTemperature,
+    contextLength: selectedWorkspace?.defaultContextLength,
+    includeProfileContext: selectedWorkspace?.includeProfileContext,
     includeWorkspaceInstructions:
-      selectedWorkspace?.include_workspace_instructions,
-    embeddingsProvider: selectedWorkspace?.embeddings_provider
+      selectedWorkspace?.includeWorkspaceInstructions,
+    embeddingsProvider: selectedWorkspace?.embeddingsProvider
   })
 
   useEffect(() => {
     const workspaceImage =
       workspaceImages.find(
-        image => image.path === selectedWorkspace?.image_path
+        image => image.path === selectedWorkspace?.imagePath
       )?.base64 || ""
 
     setImageLink(workspaceImage)
@@ -80,41 +76,19 @@ export const WorkspaceSettings: FC<WorkspaceSettingsProps> = ({}) => {
 
     let imagePath = ""
 
-    if (selectedImage) {
-      imagePath = await uploadWorkspaceImage(selectedWorkspace, selectedImage)
-
-      const url = (await getWorkspaceImageFromStorage(imagePath)) || ""
-
-      if (url) {
-        const response = await fetch(url)
-        const blob = await response.blob()
-        const base64 = await convertBlobToBase64(blob)
-
-        setWorkspaceImages(prev => [
-          ...prev,
-          {
-            workspaceId: selectedWorkspace.id,
-            path: imagePath,
-            base64,
-            url
-          }
-        ])
-      }
-    }
-
     const updatedWorkspace = await updateWorkspace(selectedWorkspace.id, {
       ...selectedWorkspace,
       name,
       description,
-      image_path: imagePath,
+      imagePath: imagePath,
       instructions,
-      default_model: defaultChatSettings.model,
-      default_prompt: defaultChatSettings.prompt,
-      default_temperature: defaultChatSettings.temperature,
-      default_context_length: defaultChatSettings.contextLength,
-      embeddings_provider: defaultChatSettings.embeddingsProvider,
-      include_profile_context: defaultChatSettings.includeProfileContext,
-      include_workspace_instructions:
+      defaultModel: defaultChatSettings.model,
+      defaultPrompt: defaultChatSettings.prompt,
+      defaultTemperature: defaultChatSettings.temperature,
+      defaultContextLength: defaultChatSettings.contextLength,
+      embeddingsProvider: defaultChatSettings.embeddingsProvider,
+      includeProfileContext: defaultChatSettings.includeProfileContext,
+      includeWorkspaceInstructions:
         defaultChatSettings.includeWorkspaceInstructions
     })
 
@@ -142,15 +116,14 @@ export const WorkspaceSettings: FC<WorkspaceSettingsProps> = ({}) => {
     }
 
     setIsOpen(false)
-    setSelectedWorkspace(updatedWorkspace)
+    setSelectedWorkspace(updatedWorkspace as any)
     setWorkspaces(workspaces => {
       return workspaces.map(workspace => {
         if (workspace.id === selectedWorkspace.id) {
-          return updatedWorkspace
+          return { ...workspace, ...updatedWorkspace };
         }
-
-        return workspace
-      })
+        return workspace;
+      });
     })
 
     toast.success("Workspace updated!")
@@ -188,10 +161,10 @@ export const WorkspaceSettings: FC<WorkspaceSettingsProps> = ({}) => {
           <SheetHeader>
             <SheetTitle className="flex items-center justify-between">
               Workspace Settings
-              {selectedWorkspace?.is_home && <IconHome />}
+              {selectedWorkspace?.isHome && <IconHome />}
             </SheetTitle>
 
-            {selectedWorkspace?.is_home && (
+            {selectedWorkspace?.isHome && (
               <div className="text-sm font-light">
                 This is your home workspace for personal use.
               </div>
@@ -276,7 +249,7 @@ export const WorkspaceSettings: FC<WorkspaceSettingsProps> = ({}) => {
 
         <div className="mt-6 flex justify-between">
           <div>
-            {!selectedWorkspace.is_home && (
+            {!selectedWorkspace.isHome && (
               <DeleteWorkspace
                 workspace={selectedWorkspace}
                 onDelete={() => setIsOpen(false)}

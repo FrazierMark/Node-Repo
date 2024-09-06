@@ -1,14 +1,12 @@
-"use client"
-
-import { Sidebar } from "@/components/sidebar/sidebar"
-import { SidebarSwitcher } from "@/components/sidebar/sidebar-switcher"
-import { Button } from "@/components/ui/button"
-import { Tabs } from "@/components/ui/tabs"
-import useHotkey from "@/lib/hooks/use-hotkey"
-import { cn } from "@/lib/utils"
-import { ContentType } from "@/types"
+import { Sidebar } from "#app/components/sidebar/sidebar"
+import { SidebarSwitcher } from "#app/components/sidebar/sidebar-switcher"
+import { Button } from "#app/components/ui/button"
+import { Tabs } from "#app/components/ui/tabs"
+import useHotkey from "#app/lib/hooks/use-hotkey"
+import { cn } from '#app/utils/misc.tsx'
+import { ContentType } from "#app/../types"
 import { IconChevronCompactRight } from "@tabler/icons-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useNavigate, useParams, useLocation, useSearchParams } from '@remix-run/react';
 import { FC, useState } from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
 import { CommandK } from "../utility/command-k"
@@ -22,9 +20,11 @@ interface DashboardProps {
 export const Dashboard: FC<DashboardProps> = ({ children }) => {
   useHotkey("s", () => setShowSidebar(prevState => !prevState))
 
-  const pathname = usePathname()
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams();
   const tabValue = searchParams.get("tab") || "chats"
 
   const { handleSelectDeviceFile } = useSelectFileHandler()
@@ -39,12 +39,10 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
   const onFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
-
-    const files = event.dataTransfer.files
-    const file = files[0]
-
-    handleSelectDeviceFile(file)
-
+    const file = event.dataTransfer.files[0]
+    if (file) {
+      handleSelectDeviceFile(file)
+    }
     setIsDragging(false)
   }
 
@@ -86,9 +84,9 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
           <Tabs
             className="flex h-full"
             value={contentType}
-            onValueChange={tabValue => {
+            onValueChange={(tabValue: string) => {
               setContentType(tabValue as ContentType)
-              router.replace(`${pathname}?tab=${tabValue}`)
+              navigate(`${pathname}?tab=${tabValue}`)
             }}
           >
             <SidebarSwitcher onContentTypeChange={setContentType} />

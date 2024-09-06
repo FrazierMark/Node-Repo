@@ -1,9 +1,8 @@
-import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
-import { ChatbotUIContext } from "@/context/context"
-import { LLM_LIST } from "@/lib/models/llm/llm-list"
-import { cn } from "@/lib/utils"
-import { Tables } from "@/supabase/types"
-import { LLM, LLMID, MessageImage, ModelProvider } from "@/types"
+import { useChatHandler } from "#app/components/chat/chat-hooks/use-chat-handler"
+import { ChatbotUIContext } from "#app/../context/context"
+import { LLM_LIST } from "#app/lib/models/llm/llm-list"
+import { DbModels } from "#app/../types/dbModels"
+import { LLM, LLMID, MessageImage, ModelProvider } from "#app/../types"
 import {
   IconBolt,
   IconCaretDownFilled,
@@ -13,7 +12,7 @@ import {
   IconMoodSmile,
   IconPencil
 } from "@tabler/icons-react"
-import Image from "next/image"
+import { cn } from '#app/utils/misc.tsx'
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { ModelIcon } from "../models/model-icon"
 import { Button } from "../ui/button"
@@ -27,11 +26,11 @@ import { MessageMarkdown } from "./message-markdown"
 const ICON_SIZE = 32
 
 interface MessageProps {
-  message: Tables<"messages">
+  message: DbModels["Message"]
   fileItems: Tables<"file_items">[]
   isEditing: boolean
   isLast: boolean
-  onStartEdit: (message: Tables<"messages">) => void
+  onStartEdit: (message: DbModels["messages"]) => void
   onCancelEdit: () => void
   onSubmitEdit: (value: string, sequenceNumber: number) => void
 }
@@ -349,7 +348,7 @@ export const Message: FC<MessageProps> = ({
                       {fileItems
                         .filter(fileItem => {
                           const parentFile = files.find(
-                            parentFile => parentFile.id === fileItem.file_id
+                            parentFile => parentFile.id === fileItem.fileId
                           )
                           return parentFile?.id === file.id
                         })
@@ -377,11 +376,11 @@ export const Message: FC<MessageProps> = ({
         )}
 
         <div className="mt-3 flex flex-wrap gap-2">
-          {message.image_paths.map((path, index) => {
+          {message.imagePaths.map((path, index) => {
             const item = chatImages.find(image => image.path === path)
 
             return (
-              <Image
+              <img
                 key={index}
                 className="cursor-pointer rounded hover:opacity-50"
                 src={path.startsWith("data") ? path : item?.base64}

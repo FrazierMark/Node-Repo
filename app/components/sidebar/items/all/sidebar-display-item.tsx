@@ -3,7 +3,6 @@ import { createChat } from "#app/utils/chats.server"
 import { cn } from '#app/utils/misc.tsx'
 import { DbModels } from '#app/../types/dbModels'
 import { ContentType, DataItemType } from "#app/../types"
-
 import { FC, useContext, useRef, useState } from "react"
 import { SidebarUpdateItem } from "./sidebar-update-item"
 

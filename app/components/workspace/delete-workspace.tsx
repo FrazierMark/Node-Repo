@@ -1,5 +1,5 @@
-import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
-import { Button } from "@/components/ui/button"
+import { useChatHandler } from "#app/components/chat/chat-hooks/use-chat-handler"
+import { Button } from "#app/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,16 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "@/components/ui/dialog"
-import { ChatbotUIContext } from "@/context/context"
-import { deleteWorkspace } from "@/db/workspaces"
-import { Tables } from "@/supabase/types"
+} from "#app/components/ui/dialog"
+import { ChatbotUIContext } from "#app/../context/context"
+import { deleteWorkspace } from "#app/utils/workspaces.server"
+import { DbModels } from '#app/../types/dbModels'
 import { FC, useContext, useRef, useState } from "react"
 import { Input } from "../ui/input"
-import { useRouter } from "next/navigation"
+import { useNavigate, useNavigation } from '@remix-run/react'
 
 interface DeleteWorkspaceProps {
-  workspace: Tables<"workspaces">
+  workspace: DbModels["Workspace"]
   onDelete: () => void
 }
 
@@ -27,7 +27,7 @@ export const DeleteWorkspace: FC<DeleteWorkspaceProps> = ({
 }) => {
   const { setWorkspaces, setSelectedWorkspace } = useContext(ChatbotUIContext)
   const { handleNewChat } = useChatHandler()
-  const router = useRouter()
+  const navigate  = useNavigate()
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -43,10 +43,14 @@ export const DeleteWorkspace: FC<DeleteWorkspaceProps> = ({
         w => w.id !== workspace.id
       )
 
-      const defaultWorkspace = filteredWorkspaces[0]
+      const defaultWorkspace = filteredWorkspaces[0] || null
 
       setSelectedWorkspace(defaultWorkspace)
-      router.push(`/${defaultWorkspace.id}/chat`)
+      if (defaultWorkspace) {
+        navigate(`/${defaultWorkspace.id}/chat`)
+      } else {
+        navigate('/')
+      }
 
       return filteredWorkspaces
     })
