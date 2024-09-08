@@ -292,6 +292,7 @@ model Assistant {
   AssistantTool AssistantTool[]
   Message Message[]
 }
+
 model AssistantWorkspace {
   userId      String
   assistantId String
