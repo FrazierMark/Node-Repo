@@ -210,7 +210,7 @@ function App() {
 			env={data.ENV}
 		>
 			<div className="flex h-screen flex-col justify-between">
-				<header className="container py-6">
+				<header className="container py-6 border-b border-gray-200 dark:border-gray-700 pb-2">
 					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 						<Logo />
 						<div className="ml-auto hidden max-w-sm flex-1 sm:block">
@@ -226,6 +226,7 @@ function App() {
 							)}
 						</div>
 						<div className="block w-full sm:hidden">{searchBar}</div>
+						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 					</nav>
 				</header>
 
@@ -233,10 +234,6 @@ function App() {
 					<Outlet />
 				</div>
 
-				<div className="container flex justify-between pb-5">
-					<Logo />
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
 			</div>
 			<EpicToaster closeButton position="top-center" theme={theme} />
 			<EpicProgress />

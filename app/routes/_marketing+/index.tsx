@@ -52,11 +52,11 @@ export default function Index() {
 						Check the{' '}
 						<a
 							className="underline hover:no-underline"
-							href="https://github.com/epicweb-dev/epic-stack/blob/main/docs/getting-started.md"
+							href="https://github.com/FrazierMark/Node-Repo"
 						>
 							Getting Started guide
 						</a>{' '}
-						file for how to get your project off the ground!
+						for how to get visualize your repository!
 					</p>
 				</div>
 				<ul className="mt-16 flex max-w-3xl flex-wrap justify-center gap-2 sm:gap-4 xl:mt-0 xl:grid xl:grid-flow-col xl:grid-cols-5 xl:grid-rows-6">
