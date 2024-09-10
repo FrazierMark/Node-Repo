@@ -8,6 +8,7 @@ import {
 import { cn } from '#app/utils/misc.tsx'
 import { logos } from './logos/logos.ts'
 import SphereSVG from './logos/sphere.tsx'
+import { RepoSearchBar } from '#app/components/repo-search-bar.tsx'
 
 export const meta: MetaFunction = () => [{ title: 'Node Repo' }]
 
@@ -59,8 +60,9 @@ export default function Index() {
 						for how to get visualize your repository!
 					</p>
 				</div>
-				<ul className="mt-16 flex max-w-3xl flex-wrap justify-center gap-2 sm:gap-4 xl:mt-0 xl:grid xl:grid-flow-col xl:grid-cols-5 xl:grid-rows-6">
-					{/* <TooltipProvider>
+				<RepoSearchBar />
+				{/* <ul className="mt-16 flex max-w-3xl flex-wrap justify-center gap-2 sm:gap-4 xl:mt-0 xl:grid xl:grid-flow-col xl:grid-cols-5 xl:grid-rows-6">
+					<TooltipProvider>
 						{logos.map((logo, i) => (
 							<li
 								key={logo.href}
@@ -84,8 +86,8 @@ export default function Index() {
 								</Tooltip>
 							</li>
 						))}
-					</TooltipProvider> */}
-				</ul>
+					</TooltipProvider>
+				</ul> */}
 			</div>
 		</main>
 	)

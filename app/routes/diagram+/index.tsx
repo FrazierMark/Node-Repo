@@ -10,6 +10,7 @@ import {
 	BackgroundVariant,
 } from '@xyflow/react'
 import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode'
+import { useSearchParams } from '@remix-run/react'
 import React, { useCallback, useMemo } from 'react'
 
 const initialNodes = [
@@ -20,9 +21,16 @@ const initialNodes = [
 ]
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }]
 
-export default function App() {
+
+
+export default function Diagram() {
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [searchParams] = useSearchParams()
+  const treeData = JSON.parse(decodeURIComponent(searchParams.get('treeData') || '{}'))
+
+  
+  
 
 	const onConnect = useCallback(
 		(params: any) => setEdges((eds) => addEdge(params, eds)),
