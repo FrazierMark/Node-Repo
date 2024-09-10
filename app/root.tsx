@@ -22,6 +22,7 @@ import { useRef } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
+import CanvasScene from './components/CanvasComponents/CanvasScene.tsx'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { SearchBar } from './components/search-bar.tsx'
@@ -49,7 +50,7 @@ import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
 import { useOptionalUser, useUser } from './utils/user.ts'
-import CanvasScene from './components/CanvasComponents/CanvasScene.tsx'
+
 
 export const links: LinksFunction = () => {
 	return [
@@ -245,12 +246,9 @@ function App() {
 
 function Logo() {
 	return (
-		<Link to="/" className="group grid leading-snug">
+		<Link to="/diagram" className="group grid leading-snug">
 			<span className="font-light transition group-hover:-translate-x-1">
-				epic
-			</span>
-			<span className="font-bold transition group-hover:translate-x-1">
-				notes
+				Diagram
 			</span>
 		</Link>
 	)
