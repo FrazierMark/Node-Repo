@@ -20,10 +20,7 @@ export type ProcessedTree = {
 // GitHub API functions
 async function githubRequest(path: string) {
   const response = await fetch(`https://api.github.com${path}`, {
-    headers: {
-      Authorization: `token ${process.env.GITHUB_TOKEN}`,
-      Accept: 'application/vnd.github.v3+json',
-    },
+    headers: {},
   });
   if (!response.ok) {
     throw new Error(`GitHub API error: ${response.statusText}`);
@@ -62,6 +59,8 @@ export async function processDir(
 
   // Get the repository tree from GitHub
   const tree = await getRepoTree(owner, repo);
+  console.log(owner);
+  console.log(repo);
 
   // Check if the path should be excluded
   const shouldExcludePath = (path: string) => {
@@ -92,8 +91,9 @@ export async function processDir(
         }
       }
     });
+    
     return result;
+    
   };
-
   return processTree(tree);
 }

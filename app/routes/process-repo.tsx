@@ -3,24 +3,48 @@ import { json, redirect, type ActionFunctionArgs } from '@remix-run/node'
 import { isValidRepoUrl } from '#app/utils/repo-util'
 import { processDir } from '#app/utils/github-repo.server'
 import { convertRepoTree } from '#app/utils/helpers/repo-engine-helper'
+import { connectionSessionStorage } from '#app/utils/connections.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
+import { requireUserId } from '#app/utils/auth.server.ts'
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData()
-  const url = formData.get('url')
-
-  if (typeof url !== 'string' || !isValidRepoUrl(url)) {
-    return json({ error: 'Invalid GitHub URL' }, { status: 400 })
-  }
-
+  const userId = await requireUserId(request)
   try {
+    const formData = await request.formData()
+    const url = formData.get('url')
+
+    if (typeof url !== 'string' || !isValidRepoUrl(url)) {
+      return json({ error: 'Invalid GitHub URL' }, { status: 400 })
+    }
+
     const processedTree = await processDir(url)
     const convertedTree = convertRepoTree(processedTree)
 
-    // Store the converted tree in the session or a temporary storage
-    // For this example, we'll use a simple URL parameter
-    const treeData = encodeURIComponent(JSON.stringify(convertedTree))
-    return redirect(`/diagram?treeData=${treeData}`)
+    const treeDataString = JSON.stringify(convertedTree);
+
+    const repoTree = await prisma.repoTree.create({
+      data: {
+        userId: userId,
+        treeData: treeDataString,
+      },
+    });
+
+    // Commit the session and redirect
+    return redirect('/diagram', {
+      headers: {
+        'Set-Cookie': await connectionSessionStorage.commitSession(connectionSession),
+      },
+    })
   } catch (error) {
+    console.error('Error in process-repo action:', error)
     return json({ error: 'Failed to process repository' }, { status: 500 })
   }
+}
+
+export default function ProcessRepo() {
+  return null
+}
+
+function setupUser() {
+  throw new Error('Function not implemented.')
 }
