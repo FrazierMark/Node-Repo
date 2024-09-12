@@ -8,36 +8,82 @@ import {
 	useEdgesState,
 	addEdge,
 	BackgroundVariant,
+  OnConnect,
+  OnEdgesChange,
+  OnNodesChange,
+  NodeChange,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from '@xyflow/react'
 import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode'
 import { useSearchParams } from '@remix-run/react'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { prisma } from '#app/utils/db.server'
+import { requireUserId } from '#app/utils/auth.server'
 import React, { useCallback, useMemo } from 'react'
+import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	const userId = await requireUserId(request)
+
+	const repoTree = await prisma.repoTree.findFirst({
+		where: { userId },
+		orderBy: { createdAt: 'desc' },
+		select: { treeData: true },
+	})
+
+	if (!repoTree) {
+		throw new Response('No repo data found', { status: 404 })
+	}
+
+	return json({ treeData: JSON.parse(repoTree.treeData) as RepoTree })
+}
 
 const initialNodes = [
 	{ id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
 	{ id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
-  { id: '3', type: 'codeEditorNode', position: { x: 0, y: 200 }, data: { label: '3' } },
-  { id: '4', type: 'codeEditorNode', position: { x: 0, y: 300 }, data: { label: '4' } },
+	{
+		id: '3',
+		type: 'codeEditorNode',
+		position: { x: 0, y: 200 },
+		data: { label: '3' },
+	},
+	{
+		id: '4',
+		type: 'codeEditorNode',
+		position: { x: 0, y: 300 },
+		data: { label: '4' },
+	},
 ]
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }]
 
-
-
 export default function Diagram() {
-	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
-  const [searchParams] = useSearchParams()
-  const treeData = JSON.parse(decodeURIComponent(searchParams.get('treeData') || '{}'))
+	const { treeData } = useLoaderData<typeof loader>()
+	const [searchParams] = useSearchParams()
 
-  
-  
+  const initialNodes = treeData ? treeData.repoNodes : []
+  const initialEdges = treeData ? treeData.edges : []
 
-	const onConnect = useCallback(
-		(params: any) => setEdges((eds) => addEdge(params, eds)),
+  const [nodes, setNodes ] = useNodesState(initialNodes)
+  const [edges, setEdges ] = useEdgesState(initialEdges)
+
+
+	const onNodesChange: OnNodesChange = useCallback(
+		(changes: NodeChange[]) =>
+			setNodes((nds) => applyNodeChanges(changes, nds)),
+		[setNodes],
+	)
+	const onEdgesChange: OnEdgesChange = useCallback(
+		(changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+		[setEdges],
+	)
+	const onConnect: OnConnect = useCallback(
+		(connection) => setEdges((eds) => addEdge(connection, eds)),
 		[setEdges],
 	)
 
-  const nodeTypes = useMemo(() => ({ codeEditorNode: CodeEditorNode }), [])
+	const nodeTypes = useMemo(() => ({ codeEditorNode: CodeEditorNode }), [])
 
 	return (
 		<ReactFlow

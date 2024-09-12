@@ -19,7 +19,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const processedTree = await processDir(url)
     const convertedTree = convertRepoTree(processedTree)
-
     const treeDataString = JSON.stringify(convertedTree);
 
     const repoTree = await prisma.repoTree.create({
@@ -29,18 +28,12 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
 
-    // Commit the session and redirect
-    return redirect('/diagram', {
-      headers: {
-        'Set-Cookie': await connectionSessionStorage.commitSession(connectionSession),
-      },
-    })
+    return json({ success: true, repoTreeId: repoTree.id });
   } catch (error) {
-    console.error('Error in process-repo action:', error)
-    return json({ error: 'Failed to process repository' }, { status: 500 })
+    console.error('Error processing repo:', error);
+    return json({ error: 'Failed to process repository' }, { status: 500 });
   }
 }
-
 export default function ProcessRepo() {
   return null
 }
