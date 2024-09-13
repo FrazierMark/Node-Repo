@@ -14,6 +14,7 @@ import {
   NodeChange,
   applyNodeChanges,
   applyEdgeChanges,
+  Edge, // Add this line
 } from '@xyflow/react'
 import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode'
 import { useSearchParams } from '@remix-run/react'
@@ -65,13 +66,12 @@ export default function Diagram() {
   const initialNodes = treeData ? treeData.repoNodes : []
   const initialEdges = treeData ? treeData.edges : []
 
-  const [nodes, setNodes ] = useNodesState(initialNodes)
-  const [edges, setEdges ] = useEdgesState(initialEdges)
-
+  const [nodes, setNodes] = useNodesState(initialNodes)
+  const [edges, setEdges] = useEdgesState(initialEdges as Edge[])
 
 	const onNodesChange: OnNodesChange = useCallback(
 		(changes: NodeChange[]) =>
-			setNodes((nds) => applyNodeChanges(changes, nds)),
+			setNodes((nds) => applyNodeChanges(changes, nds) as typeof nds),
 		[setNodes],
 	)
 	const onEdgesChange: OnEdgesChange = useCallback(
