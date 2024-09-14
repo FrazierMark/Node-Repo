@@ -16,7 +16,7 @@ import {
   applyEdgeChanges,
   Edge, // Add this line
 } from '@xyflow/react'
-import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode'
+import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode/CodeEditorNode'
 import { useSearchParams } from '@remix-run/react'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
