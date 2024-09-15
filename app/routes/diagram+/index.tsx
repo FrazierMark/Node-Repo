@@ -14,7 +14,8 @@ import {
   NodeChange,
   applyNodeChanges,
   applyEdgeChanges,
-  Edge, // Add this line
+  Edge,
+  NodeTypes, // Add this line
 } from '@xyflow/react'
 import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode/CodeEditorNode'
 import { useSearchParams } from '@remix-run/react'
@@ -24,6 +25,8 @@ import { prisma } from '#app/utils/db.server'
 import { requireUserId } from '#app/utils/auth.server'
 import React, { useCallback, useMemo } from 'react'
 import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
+import { NodeType } from '#app/utils/enums/nodeTypeEnum'
+import PrimitiveNode from '../../components/CustomNodes/RepoNodeTypes/PrimitiveNode'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -40,6 +43,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	return json({ treeData: JSON.parse(repoTree.treeData) as RepoTree })
 }
+
+const nodeTypes: NodeTypes = {
+  // [NodeType.Object]: ObjectNode,
+  [NodeType.Primitive]: PrimitiveNode,
+};
 
 const initialNodes = [
 	{ id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
@@ -83,7 +91,7 @@ export default function Diagram() {
 		[setEdges],
 	)
 
-	const nodeTypes = useMemo(() => ({ codeEditorNode: CodeEditorNode }), [])
+	// const nodeTypes = useMemo(() => ({ codeEditorNode: CodeEditorNode }), [])
 
 	return (
 		<ReactFlow

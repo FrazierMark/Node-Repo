@@ -1,7 +1,6 @@
 import { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { PrimitiveRepoNode } from '../../../store/repo-engine/types/repo-node.type';
-
+import { PrimitiveRepoNode } from '#app/utils/node-types';
 
 const PrimitiveNode = memo(({ id, data, isConnectable }: NodeProps<PrimitiveRepoNode>) => {
   return (
