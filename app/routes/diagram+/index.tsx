@@ -26,7 +26,8 @@ import { requireUserId } from '#app/utils/auth.server'
 import React, { useCallback, useMemo } from 'react'
 import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
 import { NodeType } from '#app/utils/enums/nodeTypeEnum'
-import PrimitiveNode from '../../components/CustomNodes/RepoNodeTypes/PrimitiveNode'
+import PrimitiveNode from '#app/components/CustomNodes/RepoNodeTypes/PrimitiveNode'
+import DirectoryNode from '#app/components/CustomNodes/RepoNodeTypes/DirectoryNode.js'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -45,27 +46,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 const nodeTypes: NodeTypes = {
-  // [NodeType.Object]: ObjectNode,
+  [NodeType.Directory]: DirectoryNode,
   [NodeType.Primitive]: PrimitiveNode,
+  [NodeType.CodeEditor]: CodeEditorNode,
 };
-
-const initialNodes = [
-	{ id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
-	{ id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
-	{
-		id: '3',
-		type: 'codeEditorNode',
-		position: { x: 0, y: 200 },
-		data: { label: '3' },
-	},
-	{
-		id: '4',
-		type: 'codeEditorNode',
-		position: { x: 0, y: 300 },
-		data: { label: '4' },
-	},
-]
-const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }]
 
 export default function Diagram() {
 	const { treeData } = useLoaderData<typeof loader>()
@@ -73,6 +57,8 @@ export default function Diagram() {
 
   const initialNodes = treeData ? treeData.repoNodes : []
   const initialEdges = treeData ? treeData.edges : []
+
+  console.log(initialNodes)
 
   const [nodes, setNodes] = useNodesState(initialNodes)
   const [edges, setEdges] = useEdgesState(initialEdges as Edge[])
@@ -90,8 +76,6 @@ export default function Diagram() {
 		(connection) => setEdges((eds) => addEdge(connection, eds)),
 		[setEdges],
 	)
-
-	// const nodeTypes = useMemo(() => ({ codeEditorNode: CodeEditorNode }), [])
 
 	return (
 		<ReactFlow

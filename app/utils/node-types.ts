@@ -10,7 +10,7 @@ export type SharedNodeData = {
 	parentNodePathIds: string[]; // e.g. [], ['n0'], ['n0', 'n3', 'n5'], ...
 };
 
-export type ObjectNodeData = SharedNodeData & {
+export type DirectoryNodeData = SharedNodeData & {
 	dataType: RepoDataType.Object;
 	/**
 	 * Will be set if parent of `ObjectNode` is an array, so nullable.
@@ -39,11 +39,11 @@ export type PrimitiveNodeData = SharedNodeData & {
 	value: string | number | boolean | null;
 };
 
-export type ObjectRepoNode = Node<ObjectNodeData, NodeType.Object>;
+export type DirectoryRepoNode = Node<DirectoryNodeData, NodeType.Directory>;
 export type PrimitiveRepoNode = Node<PrimitiveNodeData, NodeType.Primitive> & {
 	id: string;
 	position: { x: number; y: number };
 };
 export type ArrayRepoNode = Node<ArrayNodeData, NodeType.Array>;
 
-export type RepoNode = ObjectRepoNode | PrimitiveRepoNode | ArrayRepoNode;
+export type RepoNode = DirectoryRepoNode | PrimitiveRepoNode | ArrayRepoNode;

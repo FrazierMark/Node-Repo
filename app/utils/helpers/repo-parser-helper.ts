@@ -52,7 +52,7 @@ export const repoTreeParser = (
 		} else {
 			repoNode = {
 				id: nodeId,
-				type: NodeType.Object,
+				type: NodeType.Directory,
 				position: getXYPosition(depth),
 				data: {
 					...sharedData,
