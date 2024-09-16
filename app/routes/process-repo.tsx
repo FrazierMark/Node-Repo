@@ -29,15 +29,16 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     return json({ success: true, repoTreeId: repoTree.id });
+
+
+    // Need to redirect to Diagram
+
   } catch (error) {
     console.error('Error processing repo:', error);
+
+    // Redirect to home page if error.
+
     return json({ error: 'Failed to process repository' }, { status: 500 });
   }
 }
-export default function ProcessRepo() {
-  return null
-}
 
-function setupUser() {
-  throw new Error('Function not implemented.')
-}

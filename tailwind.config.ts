@@ -7,6 +7,7 @@ import { extendedTheme } from './app/utils/extended-theme.ts'
 export default {
 	content: ['./app/**/*.{ts,tsx,jsx,js}'],
 	darkMode: 'class',
+	important: true,
 	theme: {
 		container: {
 			center: true,

@@ -1,41 +1,34 @@
-import { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
-import { DirectoryRepoNode } from '#app/utils/node-types';
+import { memo } from 'react'
+import { Handle, Position, NodeProps } from '@xyflow/react'
+import { DirectoryRepoNode } from '#app/utils/node-types'
 
+const DirectoryNode = memo(
+	({ id, data, isConnectable }: NodeProps<DirectoryRepoNode>) => {
+		return (
+			<div className="px-4 py-2 shadow-md rounded-md bg-blue-200 border-2 border-stone-400">
+      <div className="flex">
+        <div className="rounded-full w-12 h-12 flex justify-center items-center bg-gray-100">
+          <strong>{id}</strong>
+        </div>
+        <div className="ml-2">
+          <div className="text-lg font-bold">{data.obj.path}</div>
+          {/* <div className="text-gray-500">{data.obj.url}</div> */}
+        </div>
+      </div>
 
-const DirectoryNode = memo(({ id, data, isConnectable }: NodeProps<DirectoryRepoNode>) => {
-  return (
-    <>
       <Handle
         type="target"
         position={Position.Left}
-        style={{ background: '#555' }}
-        onConnect={(params) => console.log('handle onConnect', params)}
-        isConnectable={isConnectable}
-      />
-      <div>
-        <ul>
-          <li>id: {id}</li>
-          <li>value: {data.obj.path}</li>
-          <li>url: {data.obj.url}</li>
-        </ul>
-      </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="a"
-        style={{ top: 10, background: '#555' }}
-        isConnectable={isConnectable}
+        className="w-5 h-5 !bg-teal-500"
       />
       <Handle
         type="source"
         position={Position.Right}
-        id="b"
-        style={{ bottom: 10, top: 'auto', background: '#555' }}
-        isConnectable={isConnectable}
+        className="w-5 h-5 !bg-teal-500"
       />
-    </>
-  );
-});
+    </div>
+		)
+	},
+)
 
-export default DirectoryNode;
+export default DirectoryNode

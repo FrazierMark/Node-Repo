@@ -8,14 +8,14 @@ import {
 	useEdgesState,
 	addEdge,
 	BackgroundVariant,
-  OnConnect,
-  OnEdgesChange,
-  OnNodesChange,
-  NodeChange,
-  applyNodeChanges,
-  applyEdgeChanges,
-  Edge,
-  NodeTypes, // Add this line
+	OnConnect,
+	OnEdgesChange,
+	OnNodesChange,
+	NodeChange,
+	applyNodeChanges,
+	applyEdgeChanges,
+	Edge,
+	NodeTypes, // Add this line
 } from '@xyflow/react'
 import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode/CodeEditorNode'
 import { useSearchParams } from '@remix-run/react'
@@ -46,22 +46,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 const nodeTypes: NodeTypes = {
-  [NodeType.Directory]: DirectoryNode,
-  [NodeType.Primitive]: PrimitiveNode,
-  [NodeType.CodeEditor]: CodeEditorNode,
-};
+	[NodeType.Directory]: DirectoryNode,
+	[NodeType.Primitive]: PrimitiveNode,
+	[NodeType.CodeEditor]: CodeEditorNode,
+}
 
 export default function Diagram() {
 	const { treeData } = useLoaderData<typeof loader>()
+
+	// console.log(treeData)
 	const [searchParams] = useSearchParams()
 
-  const initialNodes = treeData ? treeData.repoNodes : []
-  const initialEdges = treeData ? treeData.edges : []
+	const initialNodes = treeData ? treeData.repoNodes : []
+	const initialEdges = treeData ? treeData.edges : []
 
-  console.log(initialNodes)
-
-  const [nodes, setNodes] = useNodesState(initialNodes)
-  const [edges, setEdges] = useEdgesState(initialEdges as Edge[])
+	const [nodes, setNodes] = useNodesState(initialNodes)
+	const [edges, setEdges] = useEdgesState(initialEdges as Edge[])
 
 	const onNodesChange: OnNodesChange = useCallback(
 		(changes: NodeChange[]) =>
