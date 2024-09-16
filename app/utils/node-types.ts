@@ -16,7 +16,10 @@ export type DirectoryNodeData = SharedNodeData & {
 	 * Will be set if parent of `ObjectNode` is an array, so nullable.
 	 */
 	arrayIndexForObject: number | null;
-	obj: object;
+	obj: {
+		path: string;
+		url: string;
+	};
 	isRootNode: boolean;
 };
 

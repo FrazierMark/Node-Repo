@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { DirectoryRepoNode } from '#app/utils/node-types';
 
+
 const DirectoryNode = memo(({ id, data, isConnectable }: NodeProps<DirectoryRepoNode>) => {
   return (
     <>
@@ -15,8 +16,8 @@ const DirectoryNode = memo(({ id, data, isConnectable }: NodeProps<DirectoryRepo
       <div>
         <ul>
           <li>id: {id}</li>
-          <li>value: {data.value}</li>
-          
+          <li>value: {data.obj.path}</li>
+          <li>url: {data.obj.url}</li>
         </ul>
       </div>
       <Handle
