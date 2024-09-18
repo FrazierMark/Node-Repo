@@ -8,37 +8,30 @@ import { prisma } from '#app/utils/db.server.ts'
 import { requireUserId } from '#app/utils/auth.server.ts'
 
 export async function action({ request }: ActionFunctionArgs) {
-  const userId = await requireUserId(request)
-  try {
-    const formData = await request.formData()
-    const url = formData.get('url')
+	const userId = await requireUserId(request)
+	try {
+		const formData = await request.formData()
+		const url = formData.get('url')
 
-    if (typeof url !== 'string' || !isValidRepoUrl(url)) {
-      return json({ error: 'Invalid GitHub URL' }, { status: 400 })
-    }
+		if (typeof url !== 'string' || !isValidRepoUrl(url)) {
+			return json({ error: 'Invalid GitHub URL' }, { status: 400 })
+		}
 
-    const processedTree = await processDir(url)
-    const convertedTree = convertRepoTree(processedTree)
-    const treeDataString = JSON.stringify(convertedTree);
+		const processedTree = await processDir(url)
+		const convertedTree = convertRepoTree(processedTree)
+		const treeDataString = JSON.stringify(convertedTree)
 
-    const repoTree = await prisma.repoTree.create({
-      data: {
-        userId: userId,
-        treeData: treeDataString,
-      },
-    });
+		const repoTree = await prisma.repoTree.create({
+			data: {
+				userId: userId,
+				treeData: treeDataString,
+			},
+		})
 
-    return json({ success: true, repoTreeId: repoTree.id });
+		return redirect(`/diagram?repoTreeId=${repoTree.id}`)
+	} catch (error) {
+		console.error('Error processing repo:', error)
 
-
-    // Need to redirect to Diagram
-
-  } catch (error) {
-    console.error('Error processing repo:', error);
-
-    // Redirect to home page if error.
-
-    return json({ error: 'Failed to process repository' }, { status: 500 });
-  }
+		return json({ error: 'Failed to process repository' }, { status: 500 })
+	}
 }
-

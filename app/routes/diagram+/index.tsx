@@ -54,7 +54,7 @@ const nodeTypes: NodeTypes = {
 export default function Diagram() {
 	const { treeData } = useLoaderData<typeof loader>()
 
-	// console.log(treeData)
+	console.log(treeData)
 	const [searchParams] = useSearchParams()
 
 	const initialNodes = treeData ? treeData.repoNodes : []
