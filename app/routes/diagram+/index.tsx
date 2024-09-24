@@ -15,8 +15,9 @@ import {
 	applyNodeChanges,
 	applyEdgeChanges,
 	Edge,
-	NodeTypes, // Add this line
+	NodeTypes,
 } from '@xyflow/react'
+import { Button } from '#app/components/ui/button.js'
 import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode/CodeEditorNode'
 import { useSearchParams } from '@remix-run/react'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
@@ -26,6 +27,7 @@ import { requireUserId } from '#app/utils/auth.server'
 import React, { useCallback, useMemo } from 'react'
 import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
 import { NodeType } from '#app/utils/enums/nodeTypeEnum'
+import { cn } from '#app/utils/misc.js'
 import PrimitiveNode from '#app/components/CustomNodes/RepoNodeTypes/PrimitiveNode'
 import DirectoryNode from '#app/components/CustomNodes/RepoNodeTypes/DirectoryNode.js'
 
@@ -78,17 +80,29 @@ export default function Diagram() {
 	)
 
 	return (
-		<ReactFlow
-			nodes={nodes}
-			edges={edges}
-			nodeTypes={nodeTypes}
-			onNodesChange={onNodesChange}
-			onEdgesChange={onEdgesChange}
-			onConnect={onConnect}
-		>
-			<Controls />
-			<MiniMap />
-			<Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-		</ReactFlow>
+		<>
+			<Button
+				className={cn(
+					'z-10 absolute left-[4px] top-[50%] size-[32px] cursor-pointer',
+				)}
+				asChild
+				variant="default"
+				size="icon"
+			>
+				<div>TEST</div>
+			</Button>
+			<ReactFlow
+				nodes={nodes}
+				edges={edges}
+				nodeTypes={nodeTypes}
+				onNodesChange={onNodesChange}
+				onEdgesChange={onEdgesChange}
+				onConnect={onConnect}
+			>
+				<Controls />
+				<MiniMap />
+				<Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+			</ReactFlow>
+		</>
 	)
 }

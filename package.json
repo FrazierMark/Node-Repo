@@ -102,6 +102,7 @@
     "morgan": "^1.10.0",
     "npm": "^10.8.3",
     "qrcode": "^1.5.3",
+    "re-resizable": "^6.10.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "remix-auth": "^3.7.0",
