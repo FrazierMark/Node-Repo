@@ -16,6 +16,10 @@ import {
 	applyEdgeChanges,
 	Edge,
 	NodeTypes,
+	NodeToolbar,
+	ReactFlowProvider,
+	Panel,
+	useReactFlow,
 } from '@xyflow/react'
 import { Button } from '#app/components/ui/button.js'
 import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode/CodeEditorNode'
@@ -30,6 +34,7 @@ import { NodeType } from '#app/utils/enums/nodeTypeEnum'
 import { cn } from '#app/utils/misc.js'
 import PrimitiveNode from '#app/components/CustomNodes/RepoNodeTypes/PrimitiveNode'
 import DirectoryNode from '#app/components/CustomNodes/RepoNodeTypes/DirectoryNode.js'
+import { IconChevronRight } from '../_marketing+/logos/IconChevronRight'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -80,17 +85,22 @@ export default function Diagram() {
 	)
 
 	return (
-		<>
-			<Button
-				className={cn(
-					'z-10 absolute left-[4px] top-[50%] size-[32px] cursor-pointer',
-				)}
-				asChild
-				variant="default"
-				size="icon"
-			>
-				<div>TEST</div>
-			</Button>
+		<ReactFlowProvider>
+			<Panel className={cn('absolute right-[4px] top-[50%]')}>
+				<Button
+					className={cn(
+						'z-15 absolute right-0 top-[50%] size-[32px] cursor-pointer',
+					)}
+					style={{
+            transform: "rotate(180deg)"
+          }}
+					asChild
+					variant="default"
+					size="icon"
+				>
+					<IconChevronRight />
+				</Button>
+			</Panel>
 			<ReactFlow
 				nodes={nodes}
 				edges={edges}
@@ -103,6 +113,6 @@ export default function Diagram() {
 				<MiniMap />
 				<Background variant={BackgroundVariant.Dots} gap={12} size={1} />
 			</ReactFlow>
-		</>
+		</ReactFlowProvider>
 	)
 }
