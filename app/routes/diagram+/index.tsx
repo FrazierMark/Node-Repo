@@ -21,10 +21,16 @@ import {
 	Panel,
 	useReactFlow,
 } from '@xyflow/react'
+import { useState } from 'react'
+import CodeEditorPanel from '#app/components/ui/code-editor-panel.js'
 import { Button } from '#app/components/ui/button.js'
 import CodeEditorNode from '../../components/CustomNodes/CodeEditorNode/CodeEditorNode'
 import { useSearchParams } from '@remix-run/react'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import {
+	ActionFunctionArgs,
+	json,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { prisma } from '#app/utils/db.server'
 import { requireUserId } from '#app/utils/auth.server'
@@ -35,6 +41,7 @@ import { cn } from '#app/utils/misc.js'
 import PrimitiveNode from '#app/components/CustomNodes/RepoNodeTypes/PrimitiveNode'
 import DirectoryNode from '#app/components/CustomNodes/RepoNodeTypes/DirectoryNode.js'
 import { IconChevronRight } from '../_marketing+/logos/IconChevronRight'
+import { useFetcher } from '@remix-run/react'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
@@ -52,6 +59,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	return json({ treeData: JSON.parse(repoTree.treeData) as RepoTree })
 }
 
+
+
 const nodeTypes: NodeTypes = {
 	[NodeType.Directory]: DirectoryNode,
 	[NodeType.Primitive]: PrimitiveNode,
@@ -60,8 +69,6 @@ const nodeTypes: NodeTypes = {
 
 export default function Diagram() {
 	const { treeData } = useLoaderData<typeof loader>()
-
-	console.log(treeData)
 	const [searchParams] = useSearchParams()
 
 	const initialNodes = treeData ? treeData.repoNodes : []
@@ -85,34 +92,24 @@ export default function Diagram() {
 	)
 
 	return (
-		<ReactFlowProvider>
-			<Panel className={cn('absolute right-[4px] top-[50%]')}>
-				<Button
-					className={cn(
-						'z-15 absolute right-0 top-[50%] size-[32px] cursor-pointer',
-					)}
-					style={{
-            transform: "rotate(180deg)"
-          }}
-					asChild
-					variant="default"
-					size="icon"
+		<>
+			<ReactFlowProvider>
+				<Panel className={cn('absolute right-[4px] top-[50%]')}>
+					<CodeEditorPanel />
+				</Panel>
+				<ReactFlow
+					nodes={nodes}
+					edges={edges}
+					nodeTypes={nodeTypes}
+					onNodesChange={onNodesChange}
+					onEdgesChange={onEdgesChange}
+					onConnect={onConnect}
 				>
-					<IconChevronRight />
-				</Button>
-			</Panel>
-			<ReactFlow
-				nodes={nodes}
-				edges={edges}
-				nodeTypes={nodeTypes}
-				onNodesChange={onNodesChange}
-				onEdgesChange={onEdgesChange}
-				onConnect={onConnect}
-			>
-				<Controls />
-				<MiniMap />
-				<Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-			</ReactFlow>
-		</ReactFlowProvider>
+					<Controls />
+					<MiniMap />
+					<Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+				</ReactFlow>
+			</ReactFlowProvider>
+		</>
 	)
 }
