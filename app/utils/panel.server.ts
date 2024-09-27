@@ -3,11 +3,11 @@ import * as cookie from 'cookie';
 const cookieName = 'panel_state';
 export type PanelState = 'open' | 'closed';
 
-export function getPanelState(request: Request): PanelState | null {
+export function getPanelState(request: Request): PanelState {
 	const cookieHeader = request.headers.get('cookie');
-	const parsed = cookieHeader ? cookie.parse(cookieHeader)[cookieName] : 'closed';
+	const parsed = cookieHeader ? cookie.parse(cookieHeader)[cookieName] : null;
 	if (parsed === 'open' || parsed === 'closed') return parsed;
-	return null;
+	return 'closed';
 }
 
 export function setPanelState(panel: PanelState) {

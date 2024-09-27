@@ -1,15 +1,16 @@
-import { json, redirect, useFetcher } from '@remix-run/react';
+import { json, redirect, useFetcher, useFetchers } from '@remix-run/react';
 import { useRequestInfo } from '#app/utils/request-info.ts'
 import { useForm, getFormProps } from '@conform-to/react';
 import { ServerOnly } from 'remix-utils/server-only';
 import { IconChevronRight } from '../_marketing+/logos/IconChevronRight';
+import { IconChevronLeft } from '../_marketing+/logos/IconChevronLeft';
 import { cn } from '#app/utils/misc.js';
 import { buttonVariants } from '#app/components/ui/button';
 import { z } from 'zod';
 import { invariantResponse } from '@epic-web/invariant';
 import { parseWithZod } from '@conform-to/zod';
 import { ActionFunctionArgs } from '@remix-run/node';
-import { setPanelState } from '#app/utils/panel.server';
+import { PanelState, setPanelState } from '#app/utils/panel.server.js';
 
 const PanelFormSchema = z.object({
 	panel: z.enum(['open', 'closed']),
@@ -39,7 +40,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 
-export function PanelSwitch() {
+export function PanelSwitch({userPreference}: {userPreference: PanelState | null}) {
 	const fetcher = useFetcher<typeof action>()
 	const requestInfo = useRequestInfo();
 
@@ -48,17 +49,15 @@ export function PanelSwitch() {
 		lastResult: fetcher.data?.result,
 	});
 
+	const currentMode = usePanelState();
+	const mode = currentMode ?? userPreference ?? 'closed';
+	const nextMode = mode === 'closed' ? 'open' : mode === 'open' ? 'closed' : 'closed';
 
-  const mode = 'closed';
-  const nextMode = mode === 'closed' ? 'open' : 'closed';
+	console.log(nextMode)
 
   const modeLabel = {
-    open: (
-      <IconChevronRight />
-    ),
-    closed: (
-      <IconChevronRight />
-    )
+    open: <IconChevronRight />,
+    closed: <IconChevronLeft />
   }
 
 	return (
@@ -71,10 +70,11 @@ export function PanelSwitch() {
 
 			<input type="hidden" name="panel" value={nextMode} />
 
-			<div>
+			<div >
 				<button
 					type="submit"
-					className={cn(
+					className={
+						cn(
 						buttonVariants({ variant: 'default', size: 'icon' }),
 						'z-15 absolute right-0 top-[50%] size-[32px] cursor-pointer',
 					)}
@@ -84,4 +84,22 @@ export function PanelSwitch() {
 			</div>
 		</fetcher.Form>
 	);
+}
+
+
+export function usePanelState() {
+  const fetchers = useFetchers();
+  const panelFetcher = fetchers.find(
+    (f) => f.formAction === '/resources/panel-switch'
+  );
+
+  if (panelFetcher && panelFetcher.formData) {
+    const submission = parseWithZod(panelFetcher.formData, {
+      schema: PanelFormSchema,
+    });
+
+    if (submission.status === 'success') {
+      return submission.value.panel;
+    }
+  }
 }

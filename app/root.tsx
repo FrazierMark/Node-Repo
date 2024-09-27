@@ -66,7 +66,7 @@ export const links: LinksFunction = () => {
 			rel: 'manifest',
 			href: '/site.webmanifest',
 			crossOrigin: 'use-credentials',
-		} as const, // necessary to make typescript happy
+		} as const,
 		{ rel: 'stylesheet', href: tailwindStyleSheetUrl },
 	].filter(Boolean)
 }
