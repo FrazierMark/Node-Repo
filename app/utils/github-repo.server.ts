@@ -1,5 +1,10 @@
 import { minimatch } from 'minimatch';
 
+interface GitHubFileResponse {
+  encoding: string;
+  content: string;
+}
+
 export type GitHubTreeItem = {
   path: string;
   mode: string;
@@ -59,8 +64,6 @@ export async function processDir(
 
   // Get the repository tree from GitHub
   const tree = await getRepoTree(owner, repo);
-  console.log(owner);
-  console.log(repo);
 
   // Check if the path should be excluded
   const shouldExcludePath = (path: string) => {
@@ -96,4 +99,18 @@ export async function processDir(
     
   };
   return processTree(tree);
+}
+
+export async function getFileCode(filePath: string): Promise<string> {
+  try {
+    const fileData = await githubRequest(filePath) as GitHubFileResponse;
+    if (fileData.encoding === 'base64') {
+      return atob(fileData.content);
+    } else {
+      throw new Error('Unexpected file encoding');
+    }
+  } catch (error) {
+    console.error('Error fetching file code:', error);
+    throw error;
+  }
 }
