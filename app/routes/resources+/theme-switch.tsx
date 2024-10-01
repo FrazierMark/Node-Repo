@@ -11,7 +11,7 @@ import { useRequestInfo } from '#app/utils/request-info.ts'
 import { type Theme, setTheme } from '#app/utils/theme.server.ts'
 
 const ThemeFormSchema = z.object({
-	theme: z.enum(['system', 'light', 'dark']),
+	theme: z.enum(['light', 'dark']),
 	// this is useful for progressive enhancement
 	redirectTo: z.string().optional(),
 })
@@ -50,9 +50,8 @@ export function ThemeSwitch({
 	})
 
 	const optimisticMode = useOptimisticThemeMode()
-	const mode = optimisticMode ?? userPreference ?? 'system'
-	const nextMode =
-		mode === 'system' ? 'light' : mode === 'light' ? 'dark' : 'system'
+	const mode = optimisticMode ?? userPreference ?? 'light'
+	const nextMode = mode === 'light' ? 'dark' : 'light'
 
 	const modeLabel = {
 		light: (
@@ -61,14 +60,9 @@ export function ThemeSwitch({
 			</Icon>
 		),
 		dark: (
-			<Icon name="moon">
-				<span className="sr-only">Dark</span>
-			</Icon>
-		),
-		system: (
-			<Icon name="laptop">
-				<span className="sr-only">System</span>
-			</Icon>
+				<Icon name="moon">
+					<span className="sr-only">Dark</span>
+				</Icon>
 		),
 	}
 
@@ -126,7 +120,7 @@ export function useTheme() {
 	const requestInfo = useRequestInfo()
 	const optimisticMode = useOptimisticThemeMode()
 	if (optimisticMode) {
-		return optimisticMode === 'system' ? hints.theme : optimisticMode
+		return optimisticMode
 	}
 	return requestInfo.userPrefs.theme ?? hints.theme
 }

@@ -23,10 +23,10 @@ export type DirectoryNodeData = SharedNodeData & {
 	isRootNode: boolean;
 };
 
-export type ArrayNodeData = SharedNodeData & {
-	dataType: RepoDataType.Array;
-	array: any[];
-};
+// export type ArrayNodeData = SharedNodeData & {
+// 	dataType: RepoDataType.Array;
+// 	array: any[];
+// };
 
 export type PrimitiveNodeData = SharedNodeData & {
 	dataType:
@@ -47,6 +47,6 @@ export type PrimitiveRepoNode = Node<PrimitiveNodeData, NodeType.Primitive> & {
 	id: string;
 	position: { x: number; y: number };
 };
-export type ArrayRepoNode = Node<ArrayNodeData, NodeType.Array>;
+// export type ArrayRepoNode = Node<ArrayNodeData, NodeType.Array>;
 
-export type RepoNode = DirectoryRepoNode | PrimitiveRepoNode | ArrayRepoNode;
+export type RepoNode = DirectoryRepoNode | PrimitiveRepoNode ;
