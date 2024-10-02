@@ -44,6 +44,16 @@ export async function getUserId(request: Request) {
 	return session.user.id
 }
 
+
+
+export async function getAccessToken(request: Request) {
+	const authSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	)
+	console.log('authSession in auth.server.ts', authSession.get('accessToken'))
+	return authSession.get('accessToken')
+}
+
 export async function requireUserId(
 	request: Request,
 	{ redirectTo }: { redirectTo?: string | null } = {},

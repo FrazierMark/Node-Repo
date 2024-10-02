@@ -47,8 +47,6 @@ export default function FlowDiagram() {
 	const [nodes, setNodes] = useNodesState(initialNodes)
 	const [edges, setEdges] = useEdgesState(initialEdges as Edge[])
 
-  console.log(nodes)
-
 	const onNodesChange: OnNodesChange = useCallback(
 		(changes: NodeChange[]) =>
 			setNodes((nds) => applyNodeChanges(changes, nds) as typeof nds),

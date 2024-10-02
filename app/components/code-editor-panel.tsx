@@ -4,7 +4,9 @@ import { cn } from '#app/utils/misc.js'
 import CodeEditorCard from './code-editor-card.tsx'
 
 const CodeEditorPanel = () => {
-	const { panelState } = useLoaderData<typeof loader>()
+	const { panelState, nodeCodeData } = useLoaderData<typeof loader>()
+
+	console.log('nodeCodeData:', nodeCodeData)
 
 	return (
 		<div

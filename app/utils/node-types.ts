@@ -28,19 +28,23 @@ export type DirectoryNodeData = SharedNodeData & {
 // 	array: any[];
 // };
 
+export type RepoNodeData = {
+	dataObject: {
+		mode: string;
+		sha: string;
+		size: number;
+		type: string;
+		url: string;
+	};
+};
+
 export type PrimitiveNodeData = SharedNodeData & {
 	dataType:
 		| RepoDataType.String
 		| RepoDataType.Number
 		| RepoDataType.Boolean
-		| RepoDataType.Null;
-	/**
-	 * `PrimitiveNode` is always an item of specific array.
-	 * It means that the parent is always an `ArrayNode`.
-	 */
-	arrayIndex: number;
-	value: string | number | boolean | null;
-};
+		| RepoDataType.Null,
+} & RepoNodeData;
 
 export type DirectoryRepoNode = Node<DirectoryNodeData, NodeType.Directory>;
 export type PrimitiveRepoNode = Node<PrimitiveNodeData, NodeType.Primitive> & {

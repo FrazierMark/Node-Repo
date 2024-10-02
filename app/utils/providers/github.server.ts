@@ -7,6 +7,7 @@ import { connectionSessionStorage } from '../connections.server.ts'
 import { type Timings } from '../timing.server.ts'
 import { MOCK_CODE_GITHUB_HEADER, MOCK_CODE_GITHUB } from './constants.ts'
 import { type AuthProvider } from './provider.ts'
+import { getAccessToken } from '../auth.server.ts'
 
 const GitHubUserSchema = z.object({ login: z.string() })
 const GitHubUserParseResult = z
@@ -32,19 +33,28 @@ export class GitHubProvider implements AuthProvider {
 				clientSecret: process.env.GITHUB_CLIENT_SECRET,
 				callbackURL: '/auth/github/callback',
 			},
-			async ({ profile }) => {
+			async ({ accessToken, profile }) => {
+				console.log('GitHub authentication successful. User ID:', profile.id);
+				console.log('Access Token received:', accessToken ? 'Yes' : 'No');
+
 				const email = profile.emails[0]?.value.trim().toLowerCase()
 				if (!email) {
 					throw new Error('Email not found')
 				}
 				const username = profile.displayName
 				const imageUrl = profile.photos[0].value
+
+				const userId = profile.id;
+				console.log('Caching token for user ID:', userId);
+				await cacheAccessToken(userId, accessToken)
+
 				return {
 					email,
 					id: profile.id,
 					username,
 					name: profile.name.givenName,
 					imageUrl,
+					accessToken,
 				}
 			},
 		)
@@ -103,4 +113,99 @@ export class GitHubProvider implements AuthProvider {
 			},
 		})
 	}
+}
+
+export async function checkNodesInCache(nodeIds: string[]): Promise<Record<string, boolean>> {
+	const results: Record<string, boolean> = {}
+
+	await Promise.all(
+		nodeIds.map(async (nodeId) => {
+			const cacheKey = `node:${nodeId}`
+			
+			try {
+				const result = await cachified({
+					key: cacheKey,
+					ttl: 1000 * 60 * 60, // 1 hour, adjust as needed
+					cache,
+					async getFreshValue(context) {
+						// Instead of returning null, we'll throw an error
+						// if the value is not in the cache
+						throw new Error('Not in cache')
+					},
+					checkValue(value) {
+						// Any non-null value is considered valid
+						return value != null
+					},
+				})
+
+				// If we reach here, the value was in the cache
+				results[nodeId] = true
+			} catch (error) {
+				// If we catch an error, it means the value was not in the cache
+				results[nodeId] = false
+			}
+		})
+	)
+
+	return results
+}
+
+export async function saveNodeToCache(nodeId: string, nodeCodeData: any): Promise<void> {
+	const cacheKey = `node:${nodeId}`
+
+	await cachified({
+		key: cacheKey,
+		ttl: 1000 * 60 * 60 * 3, // 3 hours
+		cache,
+		async getFreshValue(context) {
+			return nodeCodeData
+		},
+		checkValue(value) {
+			return value !== null
+		},
+	})
+}
+
+export async function getCachedAccessToken(userId: string): Promise<string | null> {
+  console.log('Attempting to retrieve access token for user ID:', userId);
+  try {
+    const result = await cachified({
+      key: `github:accessToken:${userId}`,
+      cache,
+      ttl: 1000 * 60 * 60 * 3, // 3 hours
+      async getFreshValue() {
+        console.log('Access token not found in cache for user ID:', userId);
+        return null;
+      },
+      checkValue(value) {
+        return typeof value === 'string';
+      },
+    });
+
+    if (result) {
+      console.log('Retrieved access token from cache for user ID:', userId);
+      return result;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error retrieving access token from cache:', error);
+    return null;
+  }
+}
+
+export async function cacheAccessToken(userId: string, accessToken: string): Promise<void> {
+  console.log('Caching access token for user ID:', userId);
+  try {
+    await cachified({
+      key: `github:accessToken:${userId}`,
+      cache,
+      ttl: 1000 * 60 * 60 * 3, // 3 hours
+      async getFreshValue() {
+        return accessToken;
+      },
+    });
+    console.log('Access token cached successfully for user ID:', userId);
+  } catch (error) {
+    console.error('Error caching access token:', error);
+  }
 }

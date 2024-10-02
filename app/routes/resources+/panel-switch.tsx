@@ -59,8 +59,6 @@ export function PanelSwitch({
 	const nextMode =
 		mode === 'closed' ? 'open' : mode === 'open' ? 'closed' : 'closed'
 
-	console.log(nextMode)
-
 	const modeLabel = {
 		open: <IconChevronRight />,
 		closed: <IconChevronLeft />,

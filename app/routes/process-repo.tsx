@@ -17,7 +17,7 @@ export async function action({ request }: ActionFunctionArgs) {
 			return json({ error: 'Invalid GitHub URL' }, { status: 400 })
 		}
 
-		const processedTree = await processDir(url)
+		const processedTree = await processDir(request, url)
 		const convertedTree = convertRepoTree(processedTree)
 		const treeDataString = JSON.stringify(convertedTree)
 

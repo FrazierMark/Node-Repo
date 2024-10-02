@@ -24,8 +24,21 @@ import { verifySessionStorage } from '#app/utils/verification.server.ts'
 import { handleNewSession } from './login.server.ts'
 import { onboardingEmailSessionKey } from './onboarding.tsx'
 import { prefilledProfileKey, providerIdKey } from './onboarding_.$provider.tsx'
+import { authSessionStorage } from '#app/utils/session.server.ts'
+import { cacheAccessToken, GitHubProvider } from '#app/utils/providers/github.server.ts'
 
 const destroyRedirectTo = { 'set-cookie': destroyRedirectToHeader }
+
+async function cacheTokenIfPresent(userId: string, accessToken: string | undefined) {
+	if (accessToken) {
+		try {
+			await cacheAccessToken(userId, accessToken);
+		} catch (error) {
+			console.error('Failed to cache access token:', error);
+			// Optionally, you could throw this error if it's critical
+		}
+	}
+}
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	// this loader performs mutations, so we need to make sure we're on the
@@ -35,6 +48,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	const providerName = ProviderNameSchema.parse(params.provider)
 	const redirectTo = getRedirectCookieValue(request)
 	const label = providerLabels[providerName]
+	const userId = await getUserId(request)
 
 	const authResult = await authenticator
 		.authenticate(providerName, request, { throwOnError: true })
@@ -42,6 +56,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			(data) => ({ success: true, data }) as const,
 			(error) => ({ success: false, error }) as const,
 		)
+
+	
 
 	if (!authResult.success) {
 		console.error(authResult.error)
@@ -56,7 +72,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		)
 	}
 
+
+
 	const { data: profile } = authResult
+
+	
 
 	const existingConnection = await prisma.connection.findUnique({
 		select: { userId: true },
@@ -65,10 +85,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		},
 	})
 
-	const userId = await getUserId(request)
+	
 
 	if (existingConnection && userId) {
 		if (existingConnection.userId === userId) {
+			await cacheTokenIfPresent(userId, profile.accessToken);
 			return redirectWithToast(
 				'/settings/profile/connections',
 				{
@@ -98,6 +119,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				userId,
 			},
 		})
+		await cacheTokenIfPresent(userId, profile.accessToken);
 		return redirectWithToast(
 			'/settings/profile/connections',
 			{
@@ -111,6 +133,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 	// Connection exists already? Make a new session
 	if (existingConnection) {
+		await cacheTokenIfPresent(existingConnection.userId, profile.accessToken);
 		return makeSession({ request, userId: existingConnection.userId })
 	}
 
@@ -128,12 +151,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				userId: user.id,
 			},
 		})
+		await cacheTokenIfPresent(user.id, profile.accessToken);
 		return makeSession(
 			{ request, userId: user.id },
 			{
 				headers: await createToastHeaders({
 					title: 'Connected',
 					description: `Your "${profile.username}" ${label} account has been connected.`,
+					// ... other headers ...
 				}),
 			},
 		)
@@ -148,7 +173,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		username:
 			typeof profile.username === 'string'
 				? normalizeUsername(profile.username)
-				: undefined,
+					: undefined,
 	})
 	verifySession.set(providerIdKey, profile.id)
 	const onboardingRedirect = [

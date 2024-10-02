@@ -1,5 +1,4 @@
 import { createCookieSessionStorage } from '@remix-run/node'
-import { createUpstashSessionStorage } from './upstash.server.ts'
 
 
 export const authSessionStorage = createCookieSessionStorage({
@@ -38,22 +37,4 @@ Object.defineProperty(authSessionStorage, 'commitSession', {
 		return setCookieHeader
 	},
 })
-
-const EXPIRATION_DURATION_IN_SECONDS = 60 * 60 * 3; // 3 hours
  
-const expires = new Date();
-expires.setSeconds(expires.getSeconds() + EXPIRATION_DURATION_IN_SECONDS);
- 
-const sessionCookie = createCookieSessionStorage({
-  cookie: {
-    name: '__session',
-    secrets: ['r3m1xr0ck1'],
-    sameSite: 'lax',
-    expires: expires,
-  },
-});
- 
-const { getSession, commitSession, destroySession } =
-  createUpstashSessionStorage({ cookie: sessionCookie });
- 
-export { getSession, commitSession, destroySession };

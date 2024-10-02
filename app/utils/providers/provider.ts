@@ -8,6 +8,7 @@ export type ProviderUser = {
 	username?: string
 	name?: string
 	imageUrl?: string
+	accessToken?: string
 }
 
 export interface AuthProvider {
@@ -19,6 +20,7 @@ export interface AuthProvider {
 	): Promise<{
 		displayName: string
 		link?: string | null
+		accessToken?: string
 	}>
 }
 
