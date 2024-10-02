@@ -115,12 +115,12 @@ export class GitHubProvider implements AuthProvider {
 	}
 }
 
-export async function checkNodesInCache(nodeIds: string[]): Promise<Record<string, boolean>> {
+export async function checkNodesInCache(repoTreeId: string, nodeIds: string[]): Promise<Record<string, boolean>> {
 	const results: Record<string, boolean> = {}
 
 	await Promise.all(
 		nodeIds.map(async (nodeId) => {
-			const cacheKey = `node:${nodeId}`
+			const cacheKey = `repo:${repoTreeId}:node:${nodeId}`
 			
 			try {
 				const result = await cachified({
@@ -150,8 +150,8 @@ export async function checkNodesInCache(nodeIds: string[]): Promise<Record<strin
 	return results
 }
 
-export async function saveNodeToCache(nodeId: string, nodeCodeData: any): Promise<void> {
-	const cacheKey = `node:${nodeId}`
+export async function saveNodeToCache(repoTreeId: string, nodeId: string, nodeCodeData: any): Promise<void> {
+	const cacheKey = `repo:${repoTreeId}:node:${nodeId}`
 
 	await cachified({
 		key: cacheKey,

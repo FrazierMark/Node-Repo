@@ -19,16 +19,25 @@ import { fetchNodeCode, getNodeCodeUrl } from '#app/utils/github-repo.server.js'
 export async function loader({ request }: LoaderFunctionArgs) {
 	const userId = await requireUserId(request)
 	const url = new URL(request.url)
+	const repoTreeId = url.searchParams.get('repoTreeId')
 	const selectedNodes =
 		url.searchParams.get('selectedNodes')?.split(',').filter(Boolean) || []
-	const nodesInCache = await checkNodesInCache(selectedNodes)
 	const panelState = getPanelState(request)
 
-	const repoTree = await prisma.repoTree.findFirst({
-		where: { userId },
-		orderBy: { createdAt: 'desc' },
-		select: { id: true, treeData: true }, // Add id to the select
+	if (!repoTreeId) {
+		throw new Response('No repoTreeId provided', { status: 400 })
+	}
+
+	const repoTree = await prisma.repoTree.findUnique({
+		where: { id: repoTreeId },
+		select: { id: true, treeData: true },
 	})
+
+	if (!repoTree) {
+		throw new Response('No repo data found', { status: 404 })
+	}
+
+	const nodesInCache = await checkNodesInCache(repoTreeId, selectedNodes)
 
 	// For nodes not in cache, fetch data and save to cache
 	const nodeCodeData: Record<string, string> = {}
@@ -36,21 +45,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	await Promise.all(
 		selectedNodes.map(async (nodeId) => {
 			if (!nodesInCache[nodeId]) {
-				if (repoTree) {
-					try {
-						const nodeUrl = await getNodeCodeUrl(repoTree.treeData, nodeId)
-						console.log('Node URL:', nodeUrl)
-						if (nodeUrl) {
-							const fetchedNodeData = await fetchNodeCode(request, nodeUrl)
-							console.log('Fetched node data:', fetchedNodeData)
-							await saveNodeToCache(nodeId, fetchedNodeData)
-							nodeCodeData[nodeId] = fetchedNodeData
-						} else {
-							console.warn(`No URL found for node ${nodeId}`)
-						}
-					} catch (error) {
-						console.error(`Error processing node ${nodeId}:`, error)
+				try {
+					const nodeUrl = await getNodeCodeUrl(repoTree.treeData, nodeId)
+					console.log('Node URL:', nodeUrl)
+					if (nodeUrl) {
+						const fetchedNodeData = await fetchNodeCode(request, nodeUrl)
+						console.log('Fetched node data:', fetchedNodeData)
+						await saveNodeToCache(repoTreeId, nodeId, fetchedNodeData)
+						nodeCodeData[nodeId] = fetchedNodeData
+					} else {
+						console.warn(`No URL found for node ${nodeId}`)
 					}
+				} catch (error) {
+					console.error(`Error processing node ${nodeId}:`, error)
 				}
 			} else {
 				// If the node is in cache, retrieve it
@@ -69,10 +76,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	if (!panelState) {
 		throw new Response('No panel state found', { status: 404 })
-	}
-
-	if (!repoTree) {
-		throw new Response('No repo data found', { status: 404 })
 	}
 
 	return json<LoaderData>({
