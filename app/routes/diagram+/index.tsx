@@ -17,7 +17,6 @@ import {
 import { fetchNodeCode, getNodeCodeUrl } from '#app/utils/github-repo.server.js'
 
 export async function loader({ request }: LoaderFunctionArgs) {
-	const userId = await requireUserId(request)
 	const url = new URL(request.url)
 	const repoTreeId = url.searchParams.get('repoTreeId')
 	const selectedNodes =
@@ -47,7 +46,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			if (!nodesInCache[nodeId]) {
 				try {
 					const nodeUrl = await getNodeCodeUrl(repoTree.treeData, nodeId)
-					console.log('Node URL:', nodeUrl)
+					console.log('Index.tsx: Node URL:', nodeUrl)
 					if (nodeUrl) {
 						const fetchedNodeData = await fetchNodeCode(request, nodeUrl)
 						console.log('Fetched node data:', fetchedNodeData)

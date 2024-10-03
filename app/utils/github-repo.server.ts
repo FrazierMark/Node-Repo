@@ -187,6 +187,7 @@ export async function fetchNodeCode(
 	request: Request,
 	filePath: string,
 ): Promise<string> {
+  console.log('fetchNodeCode(): Fetching node code for:', filePath)
 	try {
 		const fileData = (await githubRequest(
 			request,

@@ -96,6 +96,14 @@ async function seed() {
 							},
 						})),
 					},
+					repos: {
+						create: Array.from({
+							length: faker.number.int({ min: 1, max: 3 }),
+						}).map(() => ({
+							title: faker.lorem.sentence(),
+							content: faker.lorem.paragraphs(),
+						})),
+					},
 				},
 			})
 			.catch((e) => {

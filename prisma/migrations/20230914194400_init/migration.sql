@@ -20,6 +20,17 @@ CREATE TABLE "Note" (
 );
 
 -- CreateTable
+CREATE TABLE "Repo" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    "ownerId" TEXT NOT NULL,
+    CONSTRAINT "Repo_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "NoteImage" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "altText" TEXT,
