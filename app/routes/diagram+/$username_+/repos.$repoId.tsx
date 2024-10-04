@@ -74,6 +74,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('No panel state found', { status: 404 })
 	}
 
+	if (!nodeCodeData) {
+		throw new Response('No node code data found', { status: 404 })
+	}
+
 	return json<LoaderData>({
 		treeData: JSON.parse(repo.content) as RepoTree,
 		panelState,

@@ -3,7 +3,7 @@ import { DEFAULT_CODE } from '#app/utils/providers/constants.js'
 import { Editor } from '@monaco-editor/react'
 
 
-const CodeEditorCard = () => {
+const CodeEditorCard = ({ nodeId, nodeCode }: { nodeId: string; nodeCode: string })  => {
 	const theme = useTheme()
 
   const monacoTheme = theme === 'dark' ? 'vs-dark' : 'vs'
@@ -22,7 +22,7 @@ const CodeEditorCard = () => {
 					},
 					overviewRulerLanes: 0,
 				}}
-				defaultValue={DEFAULT_CODE}
+				defaultValue={nodeCode}
 				className="h-full"
 			/>
 		</div>
