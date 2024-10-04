@@ -10,14 +10,13 @@ import { z } from 'zod'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { MAX_UPLOAD_SIZE, RepoEditorSchema } from './__repo-editor'
+import { convertRepoTree } from '#app/utils/helpers/repo-engine-helper.js'
+import { processDir } from '#app/utils/github-repo.server.js'
 
 export async function action({ request }: ActionFunctionArgs) {
 	const userId = await requireUserId(request)
 
-	const formData = await parseMultipartFormData(
-		request,
-		createMemoryUploadHandler({ maxPartSize: MAX_UPLOAD_SIZE }),
-	)
+	const formData = await request.formData()
 
 	const submission = await parseWithZod(formData, {
 		schema: RepoEditorSchema.superRefine(async (data, ctx) => {
@@ -34,6 +33,7 @@ export async function action({ request }: ActionFunctionArgs) {
 				})
 			}
 		}),
+		async: true,
 	})
 
 	if (submission.status !== 'success') {
@@ -43,19 +43,25 @@ export async function action({ request }: ActionFunctionArgs) {
 		)
 	}
 
-	const { id: repoId, title, content } = submission.value
+	const { id: repoId, url } = submission.value
+
+	const { processedTree, repoName } = await processDir(request, url)
+	const convertedTree = convertRepoTree(processedTree)
+	const treeDataString = JSON.stringify(convertedTree)
 
 	const updatedRepo = await prisma.repo.upsert({
 		select: { id: true, owner: { select: { username: true } } },
 		where: { id: repoId ?? '__new_repo__' },
 		create: {
 			ownerId: userId,
-			title,
-			content,
+			title: repoName,
+			url,
+			content: treeDataString,
 		},
 		update: {
-			title,
-			content,
+			title: repoName,
+			url,
+			content: treeDataString,
 		},
 	})
 

@@ -33,6 +33,11 @@ export type ProcessedTree = {
 	[key: string]: ProcessedTreeItem
 }
 
+export type ProcessDirResult = {
+	processedTree: ProcessedTree
+	repoName: string
+}
+
 async function githubRequest(request: Request, path: string) {
 	const userId = await getUserId(request);
 	console.log('User ID for GitHub request:', userId);
@@ -75,6 +80,7 @@ async function githubRequest(request: Request, path: string) {
 }
 
 async function getRepoTree(request: Request, owner: string, repo: string) {
+  console.log('getRepoTree(): Fetching repo tree for:', owner, repo)
 	try {
 		const branchData = await githubRequest(
 			request,
@@ -98,7 +104,7 @@ export async function processDir(
 	url: string,
 	excludedPaths: string[] = [],
 	excludedGlobs: string[] = [],
-): Promise<ProcessedTree> {
+): Promise<ProcessDirResult> {
 	const foldersToIgnore = ['.git', ...excludedPaths]
 
 	// Parse the URL to get the owner and repo
@@ -153,7 +159,10 @@ export async function processDir(
 
 		return result
 	}
-	return processTree(tree)
+	return {
+		processedTree: processTree(tree),
+		repoName: repo
+	}
 }
 
 interface ParsedData {

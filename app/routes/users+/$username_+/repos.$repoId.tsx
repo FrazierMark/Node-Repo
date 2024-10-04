@@ -23,11 +23,11 @@ import { Icon } from '#app/components/ui/icon.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
 import { requireUserId } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
+import { useIsPending } from '#app/utils/misc.tsx'
 import { requireUserWithPermission } from '#app/utils/permissions.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { userHasPermission, useOptionalUser } from '#app/utils/user.ts'
-import { type loader as notesLoader } from './repos.tsx'
+import { type loader as reposLoader } from './repos.tsx'
 
 export async function loader({ params }: LoaderFunctionArgs) {
 	const repo = await prisma.repo.findUnique({
@@ -35,6 +35,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 		select: {
 			id: true,
 			title: true,
+			url: true,
 			content: true,
 			ownerId: true,
 			updatedAt: true,
@@ -93,7 +94,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	})
 }
 
-export default function NoteRoute() {
+export default function RepoRoute() {
 	const data = useLoaderData<typeof loader>()
 	const user = useOptionalUser()
 	const isOwner = user?.id === data.repo.ownerId
@@ -108,7 +109,12 @@ export default function NoteRoute() {
 			<h2 className="mb-2 pt-12 text-h2 lg:mb-6">{data.repo.title}</h2>
 			<div className={`${displayBar ? 'pb-24' : 'pb-12'} overflow-y-auto`}>
 				<p className="whitespace-break-spaces text-sm md:text-lg">
-					{data.repo.content}
+					<Link
+						className="text-light-blue-600 hover:text-blue-800 underline hover:no-underline"
+						to={`/diagram/${user?.username}/repos/${data.repo.id}`}
+					>
+						{data.repo.url}
+					</Link>
 				</p>
 			</div>
 			{displayBar ? (
@@ -151,7 +157,7 @@ export function DeleteRepo({ id }: { id: string }) {
 			<StatusButton
 				type="submit"
 				name="intent"
-				value="delete-note"
+				value="delete-repo"
 				variant="destructive"
 				status={isPending ? 'pending' : (form.status ?? 'idle')}
 				disabled={isPending}
@@ -168,12 +174,12 @@ export function DeleteRepo({ id }: { id: string }) {
 
 export const meta: MetaFunction<
 	typeof loader,
-	{ 'routes/users+/$username_+/notes': typeof notesLoader }
+	{ 'routes/users+/$username_+/repos': typeof reposLoader }
 > = ({ data, params, matches }) => {
-	const notesMatch = matches.find(
-		(m) => m.id === 'routes/users+/$username_+/notes',
+	const reposMatch = matches.find(
+		(m) => m.id === 'routes/users+/$username_+/repos',
 	)
-	const displayName = notesMatch?.data?.owner.name ?? params.username
+	const displayName = reposMatch?.data?.owner.name ?? params.username
 	const repoTitle = data?.repo.title ?? 'Repo'
 	const repoContentsSummary =
 		data && data.repo.content.length > 100

@@ -30,15 +30,14 @@ export const MAX_UPLOAD_SIZE = 1024 * 1024 * 3 // 3MB
 
 export const RepoEditorSchema = z.object({
 	id: z.string().optional(),
-	title: z.string().min(titleMinLength).max(titleMaxLength),
-	content: z.string().min(contentMinLength).max(contentMaxLength),
+	url: z.string().min(contentMinLength).max(contentMaxLength),
 })
 
 export function RepoEditor({
 	repo,
 }: {
 	repo?: SerializeFrom<
-		Pick<Repo, 'id' | 'title' | 'content'> 
+		Pick<Repo, 'id' | 'url' > 
 	>
 }) {
 	const actionData = useActionData<typeof action>()
@@ -52,7 +51,7 @@ export function RepoEditor({
 			return parseWithZod(formData, { schema: RepoEditorSchema })
 		},
 		defaultValue: {
-			...repo,
+			url: repo?.url || '',
 		},
 		shouldRevalidate: 'onBlur',
 	})
@@ -75,19 +74,12 @@ export function RepoEditor({
 					{repo ? <input type="hidden" name="id" value={repo.id} /> : null}
 					<div className="flex flex-col gap-1">
 						<Field
-							labelProps={{ children: 'Title' }}
+							labelProps={{ children: 'Url' }}
 							inputProps={{
 								autoFocus: true,
-								...getInputProps(fields.title, { type: 'text' }),
+								...getInputProps(fields.url, { type: 'text' }),
 							}}
-							errors={fields.title.errors}
-						/>
-						<TextareaField
-							labelProps={{ children: 'Content' }}
-							textareaProps={{
-								...getTextareaProps(fields.content),
-							}}
-							errors={fields.content.errors}
+							errors={fields.url.errors}
 						/>
 					</div>
 					<ErrorList id={form.errorId} errors={form.errors} />
@@ -115,7 +107,7 @@ export function ErrorBoundary() {
 		<GeneralErrorBoundary
 			statusHandlers={{
 				404: ({ params }) => (
-					<p>No repo with the id "{params.repoTreeId}" exists</p>
+					<p>No repo with the id "{params.repo}" exists</p>
 				),
 			}}
 		/>

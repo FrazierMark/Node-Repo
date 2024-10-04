@@ -21,7 +21,7 @@ async function seed() {
 	console.timeEnd('🧹 Cleaned up the database...')
 
 	console.time('🔑 Created permissions...')
-	const entities = ['user', 'note']
+	const entities = ['user', 'note', 'repo']
 	const actions = ['create', 'read', 'update', 'delete']
 	const accesses = ['own', 'any'] as const
 
@@ -101,6 +101,7 @@ async function seed() {
 							length: faker.number.int({ min: 1, max: 3 }),
 						}).map(() => ({
 							title: faker.lorem.sentence(),
+							url: faker.internet.url(),
 							content: faker.lorem.paragraphs(),
 						})),
 					},

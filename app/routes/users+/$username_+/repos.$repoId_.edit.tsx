@@ -14,7 +14,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		select: {
 			id: true,
 			title: true,
-			content: true,
+			url: true,
 		},
 		where: {
 			id: params.repoId,

@@ -4,7 +4,7 @@ import { type loader as reposLoader } from './repos.tsx'
 export default function ReposIndexRoute() {
 	return (
 		<div className="container pt-12">
-			<p className="text-body-md">Select a repo</p>
+			<p className="text-body-md">Select a Repository</p>
 		</div>
 	)
 }
@@ -23,6 +23,7 @@ export const meta: MetaFunction<
 		{ title: `${displayName}'s Repos | Node Repo` },
 		{
 			name: 'description',
+			url: 'GitHub URL',
 			content: `Checkout ${displayName}'s ${repoCount} ${reposText} on Node Repo`,
 		},
 	]
