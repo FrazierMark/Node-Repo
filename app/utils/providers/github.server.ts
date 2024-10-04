@@ -115,56 +115,7 @@ export class GitHubProvider implements AuthProvider {
 	}
 }
 
-export async function checkNodesInCache(repoTreeId: string, nodeIds: string[]): Promise<Record<string, boolean>> {
-	const results: Record<string, boolean> = {}
 
-	await Promise.all(
-		nodeIds.map(async (nodeId) => {
-			const cacheKey = `repo:${repoTreeId}:node:${nodeId}`
-			
-			try {
-				const result = await cachified({
-					key: cacheKey,
-					ttl: 1000 * 60 * 60, // 1 hour, adjust as needed
-					cache,
-					async getFreshValue(context) {
-						// Instead of returning null, we'll throw an error
-						// if the value is not in the cache
-						throw new Error('Not in cache')
-					},
-					checkValue(value) {
-						// Any non-null value is considered valid
-						return value != null
-					},
-				})
-
-				// If we reach here, the value was in the cache
-				results[nodeId] = true
-			} catch (error) {
-				// If we catch an error, it means the value was not in the cache
-				results[nodeId] = false
-			}
-		})
-	)
-
-	return results
-}
-
-export async function saveNodeToCache(repoTreeId: string, nodeId: string, nodeCodeData: any): Promise<void> {
-	const cacheKey = `repo:${repoTreeId}:node:${nodeId}`
-
-	await cachified({
-		key: cacheKey,
-		ttl: 1000 * 60 * 60 * 3, // 3 hours
-		cache,
-		async getFreshValue(context) {
-			return nodeCodeData
-		},
-		checkValue(value) {
-			return value !== null
-		},
-	})
-}
 
 export async function getCachedAccessToken(userId: string): Promise<string | null> {
   console.log('Attempting to retrieve access token for user ID:', userId);

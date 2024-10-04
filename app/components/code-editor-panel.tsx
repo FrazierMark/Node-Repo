@@ -9,22 +9,24 @@ const CodeEditorPanel = () => {
 	const [searchParams] = useSearchParams()
 	const selectedNodes = searchParams.get('selectedNodes')?.split(',').filter(Boolean) || []
 
+	console.log(selectedNodes)
+	console.log(nodeCodeData)
+
 	return (
 		<div
 		className={cn(
-			'top-18 max-w-1/2 h-full fixed right-0 w-1/3',
+			'flex h-screen flex-col max-w-1/2 fixed right-0 w-1/3',
 			'transition-transform duration-300 ease-in-out',
 				panelState === 'open' ? 'translate-x-0' : 'translate-x-full',
 			)}
 		>
 			
-				{selectedNodes.map(nodeId => {
-					const nodeCode = nodeCodeData[nodeId]
-					return nodeCode ? (
+				{nodeCodeData.map(({ nodeId, code }) => {
+					return (
 						<div key={nodeId} >
-							<CodeEditorCard nodeId={nodeId} nodeCode={nodeCode} />
+							<CodeEditorCard nodeId={nodeId} nodeCode={code} />
 						</div>
-					) : <CodeEditorCard nodeId="1" nodeCode={DEFAULT_CODE} />
+					)
 				})}
 			
 		</div>

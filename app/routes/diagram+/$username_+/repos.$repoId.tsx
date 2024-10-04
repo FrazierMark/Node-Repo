@@ -10,11 +10,7 @@ import { cn } from '#app/utils/misc.js'
 import { getPanelState, PanelState } from '#app/utils/panel.server.js'
 import { PanelSwitch } from '#app/routes/resources+/panel-switch'
 import FlowDiagram from '#app/components/react-flow.js'
-import {
-	checkNodesInCache,
-	saveNodeToCache,
-} from '#app/utils/providers/github.server.js'
-import { fetchNodeCode, getNodeCodeUrl } from '#app/utils/github-repo.server.js'
+import { fetchNodeCode, getNodeCodeUrl, getNodeFromCache, saveNodeToCache } from '#app/utils/github-repo.server.js'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
@@ -37,38 +33,31 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('No repo data found', { status: 404 })
 	}
 
-	const nodesInCache = await checkNodesInCache(repoId, selectedNodes)
-
-	// For nodes not in cache, fetch data and save to cache
-	const nodeCodeData: Record<string, string> = {}
+	const nodeCodeData: Array<{ nodeId: string; code: string }> = []
 
 	await Promise.all(
 		selectedNodes.map(async (nodeId) => {
-			if (!nodesInCache[nodeId]) {
-				try {
+			try {
+				const cachedData = await getNodeFromCache(repoId, nodeId)
+				
+				if (cachedData) {
+					nodeCodeData.push({ nodeId, code: cachedData })
+				} else {
 					const nodeUrl = await getNodeCodeUrl(repo.content, nodeId)
-					console.log('Index.tsx: Node URL:', nodeUrl)
 					if (nodeUrl) {
-						const fetchedNodeData = await fetchNodeCode(request, nodeUrl)
-						console.log('Fetched node data:', fetchedNodeData)
+						const fetchedNodeData = await fetchNodeCode(request, nodeId, nodeUrl)
 						await saveNodeToCache(repoId, nodeId, fetchedNodeData)
-						nodeCodeData[nodeId] = fetchedNodeData
+						nodeCodeData.push({ nodeId, code: fetchedNodeData })
 					} else {
 						console.warn(`No URL found for node ${nodeId}`)
 					}
-				} catch (error) {
-					console.error(`Error processing node ${nodeId}:`, error)
 				}
-			} else {
-				// If the node is in cache, retrieve it
-				try {
-					nodeCodeData[nodeId] = await fetchNodeCode(request, nodeId)
-				} catch (error) {
-					console.error(`Error fetching cached data for node ${nodeId}:`, error)
-				}
+			} catch (error) {
+				console.error(`Error processing node ${nodeId}:`, error)
 			}
 		}),
 	)
+
 
 	if (!panelState) {
 		throw new Response('No panel state found', { status: 404 })
@@ -88,17 +77,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 type LoaderData = {
 	treeData: RepoTree
 	panelState: PanelState
-	nodeCodeData: Record<string, string>
+	nodeCodeData: Array<{ nodeId: string; code: string }>
 }
 
 export default function Diagram() {
 	const { panelState } = useLoaderData<typeof loader>()
 
 	return (
-		<div className={cn('flex h-full w-full flex-col')}>
+		<div className={cn('flex h-full w-full')}>
 			<FlowDiagram />
 			<PanelSwitch userPreference={panelState} />
 			<CodeEditorPanel />
 		</div>
 	)
 }
+

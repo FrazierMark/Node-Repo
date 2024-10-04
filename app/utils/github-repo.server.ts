@@ -1,6 +1,7 @@
-import { RepoTree } from '@prisma/client'
+import { Repo } from '@prisma/client'
 import { minimatch } from 'minimatch'
 import { authSessionStorage } from './session.server'
+import { cache, cachified } from './cache.server'
 import {
 	getAccessToken,
 	getUserId,
@@ -193,22 +194,69 @@ export async function getNodeCodeUrl(
 }
 
 export async function fetchNodeCode(
-	request: Request,
-	filePath: string,
+  request: Request,
+  nodeId: string,
+  filePath: string,
 ): Promise<string> {
   console.log('fetchNodeCode(): Fetching node code for:', filePath)
+
+  try {
+    const fileData = (await githubRequest(
+      request,
+      filePath,
+    )) as GitHubFileResponse
+
+    if (fileData.encoding === 'base64') {
+      const decodedContent = atob(fileData.content)
+      return decodedContent
+    } else {
+      throw new Error('Unexpected file encoding')
+    }
+  } catch (error) {
+    console.error('Error fetching file code:', error)
+    throw error
+  }
+}
+
+export async function getNodeFromCache(repoId: string, nodeId: string): Promise<string | null> {
+	const cacheKey = `repo:${repoId}:node:${nodeId}`
+
 	try {
-		const fileData = (await githubRequest(
-			request,
-			filePath,
-		)) as GitHubFileResponse
-		if (fileData.encoding === 'base64') {
-			return atob(fileData.content)
-		} else {
-			throw new Error('Unexpected file encoding')
-		}
+		const result = await cachified({
+			key: cacheKey,
+			ttl: 1000 * 60 * 60 * 5, // 1 hour, adjust as needed
+			cache,
+			async getFreshValue() {
+				// Instead of throwing an error, we'll return null
+				// if the value is not in the cache
+				return null
+			},
+			checkValue(value) {
+				// Any non-null value is considered valid
+				return value != null
+			},
+		})
+
+		// If we reach here, we either got a cached value or null
+		return result as string | null
 	} catch (error) {
-		console.error('Error fetching file code:', error)
-		throw error
+		console.error('Error retrieving from cache:', error)
+		return null
 	}
+}
+
+export async function saveNodeToCache(repoId: string, nodeId: string, nodeCodeData: string): Promise<void> {
+	const cacheKey = `repo:${repoId}:node:${nodeId}`
+
+	await cachified({
+		key: cacheKey,
+		ttl: 1000 * 60 * 60 * 5, // 5 hours
+		cache,
+		async getFreshValue(context) {
+			return nodeCodeData
+		},
+		checkValue(value) {
+			return value !== null
+		},
+	})
 }
