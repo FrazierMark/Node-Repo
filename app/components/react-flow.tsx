@@ -35,11 +35,9 @@ const nodeTypes: NodeTypes = {
 	[NodeType.CodeEditor]: CodeEditorNode,
 }
 
-export default function FlowDiagram({ onNodeClick }: { onNodeClick: (nodeId: string) => void }) {
-	const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-
-  const {treeData} = useLoaderData<typeof loader>()
+export default function FlowDiagram() {
+	const [searchParams, setSearchParams] = useSearchParams()
+	const { treeData } = useLoaderData<typeof loader>()
 
 	const initialNodes = treeData ? treeData.repoNodes : []
 	const initialEdges = treeData ? treeData.edges : []
@@ -61,9 +59,17 @@ export default function FlowDiagram({ onNodeClick }: { onNodeClick: (nodeId: str
 		[setEdges],
 	)
 
-	const handleNodeClick = useCallback((event: React.MouseEvent, node: RepoNode) => {
-		onNodeClick(node.id)
-	}, [onNodeClick])
+	const handleNodeClick = useCallback(
+		(event: React.MouseEvent, node: RepoNode) => {
+			const currentNodes = searchParams.get('selectedNodes')?.split(',').filter(Boolean) || []
+			const newNodes = currentNodes.includes(node.id)
+				? currentNodes.filter(id => id !== node.id)
+				: [...currentNodes, node.id]
+			
+			setSearchParams({ selectedNodes: newNodes.join(',') }, { replace: true })
+		},
+		[searchParams, setSearchParams]
+	)
 
 	return (
 		<>

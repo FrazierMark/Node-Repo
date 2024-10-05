@@ -1,18 +1,11 @@
-import { useLoaderData } from '@remix-run/react'
+import { useLoaderData, useNavigation } from '@remix-run/react'
 import { loader } from '#app/routes/diagram+/$username_+/repos.$repoId.tsx'
 import { cn } from '#app/utils/misc.js'
 import CodeEditorCard from './code-editor-card.tsx'
 
-const CodeEditorPanel = ({ 
-  nodeCodeData, 
-  selectedNodes,
-  isLoading 
-}: { 
-  nodeCodeData: Array<{ nodeId: string; code: string }>,
-  selectedNodes: string[],
-  isLoading: boolean
-}) => {
-  const { panelState } = useLoaderData<typeof loader>()
+const CodeEditorPanel = () => {
+  const { panelState, nodeCodeData, selectedNodes } = useLoaderData<typeof loader>()
+	const navigation = useNavigation()
 
   return (
     <div
@@ -22,7 +15,7 @@ const CodeEditorPanel = ({
         panelState === 'open' ? 'translate-x-0' : 'translate-x-full',
       )}
     >
-      {isLoading ? (
+      {navigation.state === 'loading' ? (
         <div>Loading...</div>
       ) : (
         nodeCodeData

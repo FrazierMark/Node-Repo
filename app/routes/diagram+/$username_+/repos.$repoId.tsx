@@ -1,18 +1,23 @@
 import '@xyflow/react/dist/style.css'
 import CodeEditorPanel from '#app/components/code-editor-panel.js'
-import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from '@remix-run/node'
+import {
+	json,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
+} from '@remix-run/node'
 import { useLoaderData, useSearchParams, useFetcher } from '@remix-run/react'
 import { prisma } from '#app/utils/db.server'
-import { useTransition } from 'react'
 import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
 import { cn } from '#app/utils/misc.js'
 import { getPanelState, PanelState } from '#app/utils/panel.server.js'
 import { PanelSwitch } from '#app/routes/resources+/panel-switch'
 import FlowDiagram from '#app/components/react-flow.js'
-import { fetchNodeCode, getNodeCodeUrl, getNodeFromCache, saveNodeToCache } from '#app/utils/github-repo.server.js'
-import { useCallback } from 'react'
-import { useNavigation } from '@remix-run/react'
-
+import {
+	fetchNodeCode,
+	getNodeCodeUrl,
+	getNodeFromCache,
+	saveNodeToCache,
+} from '#app/utils/github-repo.server.js'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
@@ -40,13 +45,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		selectedNodes.map(async (nodeId) => {
 			try {
 				const cachedData = await getNodeFromCache(repoId, nodeId)
-				
+
 				if (cachedData) {
 					nodeCodeData.push({ nodeId, code: cachedData })
 				} else {
 					const nodeUrl = await getNodeCodeUrl(repo.content, nodeId)
 					if (nodeUrl) {
-						const fetchedNodeData = await fetchNodeCode(request, nodeId, nodeUrl)
+						const fetchedNodeData = await fetchNodeCode(
+							request,
+							nodeId,
+							nodeUrl,
+						)
 						await saveNodeToCache(repoId, nodeId, fetchedNodeData)
 						nodeCodeData.push({ nodeId, code: fetchedNodeData })
 					} else {
@@ -58,7 +67,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 			}
 		}),
 	)
-
 
 	if (!panelState) {
 		throw new Response('No panel state found', { status: 404 })
@@ -94,40 +102,15 @@ type LoaderData = {
 }
 
 export default function Diagram() {
-	const { panelState, nodeCodeData, selectedNodes } = useLoaderData<typeof loader>()
+	const { panelState } = useLoaderData<typeof loader>()
 	const [searchParams, setSearchParams] = useSearchParams()
-	const navigation = useNavigation()
-	const fetcher = useFetcher()
 
-	const toggleNode = useCallback((nodeId: string) => {
-		const currentNodes = searchParams.get('selectedNodes')?.split(',').filter(Boolean) || []
-		let newNodes: string[]
-
-		if (currentNodes.includes(nodeId)) {
-			newNodes = currentNodes.filter(id => id !== nodeId)
-		} else {
-			newNodes = [...currentNodes, nodeId]
-		}
-
-		setSearchParams({ selectedNodes: newNodes.join(',') }, { replace: true })
-
-		// Optionally, you can use the action to perform server-side logic
-		fetcher.submit(
-			{ nodeId, action: currentNodes.includes(nodeId) ? 'remove' : 'add' },
-			{ method: 'post' }
-		)
-	}, [searchParams, setSearchParams, fetcher])
 
 	return (
 		<div className={cn('flex h-full w-full')}>
-			<FlowDiagram onNodeClick={toggleNode} />
+			<FlowDiagram />
 			<PanelSwitch userPreference={panelState} />
-			<CodeEditorPanel 
-				nodeCodeData={nodeCodeData} 
-				selectedNodes={selectedNodes}
-				isLoading={navigation.state !== 'idle'}
-			/>
+			<CodeEditorPanel />
 		</div>
 	)
 }
-
