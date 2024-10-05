@@ -1,10 +1,8 @@
 import '@xyflow/react/dist/style.css'
 import CodeEditorPanel from '#app/components/code-editor-panel.js'
-import { useSearchParams } from '@remix-run/react'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { prisma } from '#app/utils/db.server'
-import { requireUserId } from '#app/utils/auth.server'
 import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
 import { cn } from '#app/utils/misc.js'
 import { getPanelState, PanelState } from '#app/utils/panel.server.js'
@@ -12,9 +10,10 @@ import { PanelSwitch } from '#app/routes/resources+/panel-switch'
 import FlowDiagram from '#app/components/react-flow.js'
 import { fetchNodeCode, getNodeCodeUrl, getNodeFromCache, saveNodeToCache } from '#app/utils/github-repo.server.js'
 
+
+
 export async function loader({ request, params }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
-
 	const repoId = params.repoId
 	const selectedNodes =
 		url.searchParams.get('selectedNodes')?.split(',').filter(Boolean) || []
@@ -70,6 +69,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	return json<LoaderData>({
 		treeData: JSON.parse(repo.content) as RepoTree,
 		panelState,
+		selectedNodes,
 		nodeCodeData,
 	})
 }
@@ -77,6 +77,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 type LoaderData = {
 	treeData: RepoTree
 	panelState: PanelState
+	selectedNodes: string[]
 	nodeCodeData: Array<{ nodeId: string; code: string }>
 }
 

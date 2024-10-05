@@ -9,7 +9,7 @@ const CodeEditorCard = ({ nodeId, nodeCode }: { nodeId: string; nodeCode: string
   const monacoTheme = theme === 'dark' ? 'vs-dark' : 'vs'
 
 	return (
-		<div className="flex-auto h-full w-full border-l border-solid border-l-border bg-background">
+		<div className="h-full w-full flex-auto">
 			<Editor
 				theme={monacoTheme}
 				defaultLanguage="typescript"
@@ -23,7 +23,6 @@ const CodeEditorCard = ({ nodeId, nodeCode }: { nodeId: string; nodeCode: string
 					overviewRulerLanes: 0,
 				}}
 				defaultValue={nodeCode}
-				className="h-full"
 			/>
 		</div>
 	)

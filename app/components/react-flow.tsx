@@ -23,11 +23,11 @@ import React, { useCallback, useMemo } from 'react'
 import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
 import { NodeType } from '#app/utils/enums/nodeTypeEnum'
 import { cn } from '#app/utils/misc.js'
-import { loader } from '#app/routes/diagram+/index.tsx'
 import PrimitiveNode from '#app/components/CustomNodes/RepoNodeTypes/PrimitiveNode'
 import DirectoryNode from '#app/components/CustomNodes/RepoNodeTypes/DirectoryNode.js'
 import CodeEditorNode from './CustomNodes/CodeEditorNode/CodeEditorNode'
 import { RepoNode } from '#app/utils/node-types.js'
+import { loader } from '#app/routes/diagram+/$username_+/repos.$repoId.js'
 
 const nodeTypes: NodeTypes = {
 	[NodeType.Directory]: DirectoryNode,
