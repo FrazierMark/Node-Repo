@@ -17,12 +17,10 @@ import {
 	Edge,
 	NodeTypes,
 } from '@xyflow/react'
-import { useNavigate, useSearchParams } from '@remix-run/react'
+import { useSearchParams } from '@remix-run/react'
 import { useLoaderData } from '@remix-run/react'
 import React, { useCallback, useMemo } from 'react'
-import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
 import { NodeType } from '#app/utils/enums/nodeTypeEnum'
-import { cn } from '#app/utils/misc.js'
 import PrimitiveNode from '#app/components/CustomNodes/RepoNodeTypes/PrimitiveNode'
 import DirectoryNode from '#app/components/CustomNodes/RepoNodeTypes/DirectoryNode.js'
 import CodeEditorNode from './CustomNodes/CodeEditorNode/CodeEditorNode'

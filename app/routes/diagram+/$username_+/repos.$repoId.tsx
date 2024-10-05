@@ -103,12 +103,17 @@ type LoaderData = {
 
 export default function Diagram() {
 	const { panelState } = useLoaderData<typeof loader>()
-	const [searchParams, setSearchParams] = useSearchParams()
-
 
 	return (
-		<div className={cn('flex h-full w-full')}>
-			<FlowDiagram />
+		<div className={cn('flex h-screen w-full')}>
+			<div
+				className={cn(
+					'flex-grow transition-all duration-300',
+					panelState === 'open' ? 'mr-2/5' : '',
+				)}
+			>
+				<FlowDiagram />
+			</div>
 			<PanelSwitch userPreference={panelState} />
 			<CodeEditorPanel />
 		</div>

@@ -81,7 +81,7 @@ export function PanelSwitch({
 			<div
 				className={cn(
 					'fixed transition-all duration-300 ease-in-out',
-					mode === 'open' ? 'right-[33.33vw]' : 'right-[4px]',
+					mode === 'open' ? 'right-[40.33vw]' : 'right-[4px]',
 					'top-[50%]',
 				)}
 			>
