@@ -35,7 +35,7 @@ const nodeTypes: NodeTypes = {
 	[NodeType.CodeEditor]: CodeEditorNode,
 }
 
-export default function FlowDiagram() {
+export default function FlowDiagram({ onNodeClick }: { onNodeClick: (nodeId: string) => void }) {
 	const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -61,19 +61,9 @@ export default function FlowDiagram() {
 		[setEdges],
 	)
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: RepoNode) => {
-		const currentNodes = searchParams.get('selectedNodes')?.split(',').filter(Boolean) || []
-		const updatedNodes = node.type === NodeType.Primitive
-			? (currentNodes.includes(node.id)
-				? currentNodes.filter(id => id !== node.id)
-				: [...currentNodes, node.id])
-			: currentNodes
-		
-		const newSearchParams = new URLSearchParams(searchParams)
-		newSearchParams.set('selectedNodes', updatedNodes.join(','))
-		
-		navigate(`?${newSearchParams.toString()}`, { replace: true })
-	}, [navigate, searchParams])
+	const handleNodeClick = useCallback((event: React.MouseEvent, node: RepoNode) => {
+		onNodeClick(node.id)
+	}, [onNodeClick])
 
 	return (
 		<>
@@ -84,7 +74,7 @@ export default function FlowDiagram() {
 				onNodesChange={onNodesChange}
 				onEdgesChange={onEdgesChange}
 				onConnect={onConnect}
-        onNodeClick={onNodeClick}
+				onNodeClick={handleNodeClick}
 			>
 				<Controls />
 				<MiniMap />
@@ -92,4 +82,4 @@ export default function FlowDiagram() {
 			</ReactFlow>
 		</>
 	)
-} 
+}

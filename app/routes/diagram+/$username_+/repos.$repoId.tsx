@@ -1,15 +1,17 @@
 import '@xyflow/react/dist/style.css'
 import CodeEditorPanel from '#app/components/code-editor-panel.js'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from '@remix-run/node'
+import { useLoaderData, useSearchParams, useFetcher } from '@remix-run/react'
 import { prisma } from '#app/utils/db.server'
+import { useTransition } from 'react'
 import { type RepoTree } from '#app/utils/helpers/repo-engine-helper'
 import { cn } from '#app/utils/misc.js'
 import { getPanelState, PanelState } from '#app/utils/panel.server.js'
 import { PanelSwitch } from '#app/routes/resources+/panel-switch'
 import FlowDiagram from '#app/components/react-flow.js'
 import { fetchNodeCode, getNodeCodeUrl, getNodeFromCache, saveNodeToCache } from '#app/utils/github-repo.server.js'
-
+import { useCallback } from 'react'
+import { useNavigation } from '@remix-run/react'
 
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -74,6 +76,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 	})
 }
 
+export async function action({ request }: ActionFunctionArgs) {
+	const formData = await request.formData()
+	const nodeId = formData.get('nodeId')
+	const action = formData.get('action')
+
+	// You can perform any server-side logic here if needed
+	// For now, we'll just return the received data
+	return json({ nodeId, action })
+}
+
 type LoaderData = {
 	treeData: RepoTree
 	panelState: PanelState
@@ -82,13 +94,39 @@ type LoaderData = {
 }
 
 export default function Diagram() {
-	const { panelState } = useLoaderData<typeof loader>()
+	const { panelState, nodeCodeData, selectedNodes } = useLoaderData<typeof loader>()
+	const [searchParams, setSearchParams] = useSearchParams()
+	const navigation = useNavigation()
+	const fetcher = useFetcher()
+
+	const toggleNode = useCallback((nodeId: string) => {
+		const currentNodes = searchParams.get('selectedNodes')?.split(',').filter(Boolean) || []
+		let newNodes: string[]
+
+		if (currentNodes.includes(nodeId)) {
+			newNodes = currentNodes.filter(id => id !== nodeId)
+		} else {
+			newNodes = [...currentNodes, nodeId]
+		}
+
+		setSearchParams({ selectedNodes: newNodes.join(',') }, { replace: true })
+
+		// Optionally, you can use the action to perform server-side logic
+		fetcher.submit(
+			{ nodeId, action: currentNodes.includes(nodeId) ? 'remove' : 'add' },
+			{ method: 'post' }
+		)
+	}, [searchParams, setSearchParams, fetcher])
 
 	return (
 		<div className={cn('flex h-full w-full')}>
-			<FlowDiagram />
+			<FlowDiagram onNodeClick={toggleNode} />
 			<PanelSwitch userPreference={panelState} />
-			<CodeEditorPanel />
+			<CodeEditorPanel 
+				nodeCodeData={nodeCodeData} 
+				selectedNodes={selectedNodes}
+				isLoading={navigation.state !== 'idle'}
+			/>
 		</div>
 	)
 }
