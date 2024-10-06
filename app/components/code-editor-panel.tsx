@@ -11,7 +11,7 @@ const CodeEditorPanel = () => {
 	return (
 		<div
 			className={cn(
-				'max-w-1/2 fixed right-0 flex h-screen w-2/5 flex-col bg-background',
+				' max-w-1/2 fixed right-0 flex h-screen w-2/5 flex-col bg-background',
 				'duration-250 transition-transform ease-in-out shadow-lg',
 				panelState === 'open' ? 'translate-x-0' : 'translate-x-full',
 			)}

@@ -105,13 +105,8 @@ export default function Diagram() {
 	const { panelState } = useLoaderData<typeof loader>()
 
 	return (
-		<div className={cn('flex h-screen w-full')}>
-			<div
-				className={cn(
-					'flex-grow transition-all duration-300',
-					panelState === 'open' ? 'mr-2/5' : '',
-				)}
-			>
+		<div className={cn('flex h-[calc(100vh-75px)] w-full')}>
+			<div className={cn('flex-grow overflow-hidden')}>
 				<FlowDiagram />
 			</div>
 			<PanelSwitch userPreference={panelState} />
