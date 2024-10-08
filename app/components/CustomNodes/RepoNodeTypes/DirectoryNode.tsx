@@ -4,6 +4,8 @@ import { DirectoryRepoNode } from '#app/utils/node-types'
 
 const DirectoryNode = memo(
 	({ id, data, isConnectable }: NodeProps<DirectoryRepoNode>) => {
+    const fileName = data.obj.path.split('/').pop()
+
 		return (
 			<div className="px-4 py-2 shadow-md rounded-md bg-blue-200 border-2 border-stone-400">
       <div className="flex">
@@ -11,7 +13,7 @@ const DirectoryNode = memo(
           <strong>{id}</strong>
         </div>
         <div className="ml-2">
-          <div className="text-lg font-bold">{data.obj.path}</div>
+          <div className="text-lg font-bold">{fileName}/</div>
           {/* <div className="text-gray-500">{data.obj.url}</div> */}
         </div>
       </div>

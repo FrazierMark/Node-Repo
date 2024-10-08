@@ -12,9 +12,6 @@ export type SharedNodeData = {
 
 export type DirectoryNodeData = SharedNodeData & {
 	dataType: RepoDataType.Object;
-	/**
-	 * Will be set if parent of `ObjectNode` is an array, so nullable.
-	 */
 	arrayIndexForObject: number | null;
 	obj: {
 		path: string;
@@ -23,14 +20,11 @@ export type DirectoryNodeData = SharedNodeData & {
 	isRootNode: boolean;
 };
 
-// export type ArrayNodeData = SharedNodeData & {
-// 	dataType: RepoDataType.Array;
-// 	array: any[];
-// };
 
 export type RepoNodeData = {
 	dataObject: {
 		mode: string;
+		path: string;
 		sha: string;
 		size: number;
 		type: string;
@@ -51,6 +45,5 @@ export type PrimitiveRepoNode = Node<PrimitiveNodeData, NodeType.Primitive> & {
 	id: string;
 	position: { x: number; y: number };
 };
-// export type ArrayRepoNode = Node<ArrayNodeData, NodeType.Array>;
 
 export type RepoNode = DirectoryRepoNode | PrimitiveRepoNode ;

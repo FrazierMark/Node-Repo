@@ -4,6 +4,8 @@ import { PrimitiveRepoNode } from '#app/utils/node-types'
 
 const PrimitiveNode = memo(
 	({ id, data, isConnectable }: NodeProps<PrimitiveRepoNode>) => {
+		console.log(data)
+		const fileName = data.dataObject.path.split('/').pop()
 		return (
 			<div className="px-4 py-2 shadow-md rounded-md bg-red-200 border-2 border-stone-400">
 				<div className="flex">
@@ -11,7 +13,7 @@ const PrimitiveNode = memo(
 						<strong>{id}</strong>
 					</div>
 					<div className="ml-2">
-						<div className="text-lg font-bold">{data.value}</div>
+						<div className="text-lg font-bold">{fileName}</div>
 						{/* <div className="text-gray-500">{data.value}</div> */}
 					</div>
 				</div>
