@@ -4,18 +4,21 @@ import { Editor } from '@monaco-editor/react'
 const CodeEditorCard = ({
 	nodeId,
 	nodeCode,
+	nodeName,
 }: {
 	nodeId: string
 	nodeCode: string
+	nodeName: string
 }) => {
 	const theme = useTheme()
 	const monacoTheme = theme === 'dark' ? 'vs-dark' : 'vs'
+	const title = nodeName.split('/').pop()
 
 	return (
 		<div className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
 			<div className="border-b border-gray-200 bg-gray-50 px-4 py-2 dark:border-gray-600 dark:bg-gray-700">
 				<h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-					{nodeId}
+					{title}
 				</h3>
 			</div>
 			<div className="h-64">

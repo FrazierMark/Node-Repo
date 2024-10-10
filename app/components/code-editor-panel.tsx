@@ -17,7 +17,7 @@ const CodeEditorPanel = () => {
 			)}
 		>
 			<div className="p-4 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-				<h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Code Editor</h2>
+				<h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Code Viewer</h2>
 			</div>
 			<div className="flex-1 overflow-y-auto p-4 space-y-4">
 				{navigation.state === 'loading' ? (
@@ -27,8 +27,8 @@ const CodeEditorPanel = () => {
 				) : (
 					nodeCodeData
 						.filter(({ nodeId }) => selectedNodes.includes(nodeId))
-						.map(({ nodeId, code }) => (
-							<CodeEditorCard key={nodeId} nodeId={nodeId} nodeCode={code} />
+						.map(({ nodeId, nodeName, code }) => (
+							<CodeEditorCard key={nodeId} nodeName={nodeName} nodeId={nodeId} nodeCode={code} />
 						))
 				)}
 			</div>

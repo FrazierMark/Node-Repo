@@ -57,7 +57,7 @@ export default function Index() {
 						>
 							Getting Started guide
 						</a>{' '}
-						for how to get visualize your repository!
+						for how to visualize your repository!
 					</p>
 				</div>
 				<RepoSearchBar />

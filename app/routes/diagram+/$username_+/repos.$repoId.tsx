@@ -14,7 +14,7 @@ import { PanelSwitch } from '#app/routes/resources+/panel-switch'
 import FlowDiagram from '#app/components/react-flow.js'
 import {
 	fetchNodeCode,
-	getNodeCodeUrl,
+	getNodeCodeData,
 	getNodeFromCache,
 	saveNodeToCache,
 } from '#app/utils/github-repo.server.js'
@@ -39,7 +39,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('No repo data found', { status: 404 })
 	}
 
-	const nodeCodeData: Array<{ nodeId: string; code: string }> = []
+	const nodeCodeData: Array<{ nodeId: string; nodeName: string; code: string }> = []
 
 	await Promise.all(
 		selectedNodes.map(async (nodeId) => {
@@ -47,17 +47,20 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 				const cachedData = await getNodeFromCache(repoId, nodeId)
 
 				if (cachedData) {
-					nodeCodeData.push({ nodeId, code: cachedData })
+					nodeCodeData.push({ nodeId, nodeName: cachedData.nodeName, code: cachedData.nodeCodeData })
 				} else {
-					const nodeUrl = await getNodeCodeUrl(repo.content, nodeId)
-					if (nodeUrl) {
+					const rawNodeCodeData = await getNodeCodeData(repo.content, nodeId)
+					 
+					if (rawNodeCodeData) {
+						const nodePath = rawNodeCodeData.dataObject.path
+						const nodeUrl = rawNodeCodeData.dataObject.url
 						const fetchedNodeData = await fetchNodeCode(
 							request,
 							nodeId,
 							nodeUrl,
 						)
-						await saveNodeToCache(repoId, nodeId, fetchedNodeData)
-						nodeCodeData.push({ nodeId, code: fetchedNodeData })
+						await saveNodeToCache(repoId, nodeId, nodeUrl, fetchedNodeData)
+						nodeCodeData.push({ nodeId, nodeName: nodePath, code: fetchedNodeData })
 					} else {
 						console.warn(`No URL found for node ${nodeId}`)
 					}
@@ -98,7 +101,7 @@ type LoaderData = {
 	treeData: RepoTree
 	panelState: PanelState
 	selectedNodes: string[]
-	nodeCodeData: Array<{ nodeId: string; code: string }>
+	nodeCodeData: Array<{ nodeId: string; nodeName: string; code: string }>
 }
 
 export default function Diagram() {

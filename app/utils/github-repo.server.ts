@@ -1,9 +1,12 @@
 import { minimatch } from 'minimatch'
 import { cache, cachified } from './cache.server'
 import {
+	getAccessToken,
 	getUserId,
+	sessionKey,
 } from './auth.server'
-import { RepoNode, PrimitiveNodeData } from './node-types'
+import { prisma } from './db.server'
+import { RepoNode, PrimitiveNodeData, RepoNodeData } from './node-types'
 import { redirect } from '@remix-run/react'
 import { getCachedAccessToken } from './providers/github.server'
 
@@ -165,10 +168,10 @@ interface ParsedData {
 	repoNodes: RepoNode[]
 }
 
-export async function getNodeCodeUrl(
+export async function getNodeCodeData(
 	treeData: string,
 	nodeId: string,
-): Promise<string> {
+): Promise<RepoNodeData | null> {
 	console.log('nodeId:', nodeId)
 
 	let parsedData
@@ -176,17 +179,25 @@ export async function getNodeCodeUrl(
 		parsedData = JSON.parse(treeData) as ParsedData
 	} catch (error) {
 		console.error('Error parsing treeData:', error)
-		return ''
+		return null
 	}
 
 	const repoNodes = parsedData.repoNodes
 	const node = repoNodes.find((node) => node.id === nodeId)
 
+	console.log('node:', node)
+
 	if (node && 'data' in node && 'dataObject' in node.data) {
-		return (node.data as PrimitiveNodeData).dataObject.url || ''
+		return (node.data.dataObject as RepoNodeData)
 	}
-	return ''
+	return null
 }
+
+type CachedNode = {
+  nodeId: string;
+  nodeName: string;
+  nodeCodeData: string;
+};
 
 export async function fetchNodeCode(
   request: Request,
@@ -213,7 +224,7 @@ export async function fetchNodeCode(
   }
 }
 
-export async function getNodeFromCache(repoId: string, nodeId: string): Promise<string | null> {
+export async function getNodeFromCache(repoId: string, nodeId: string): Promise<CachedNode | null> {
 	const cacheKey = `repo:${repoId}:node:${nodeId}`
 
 	try {
@@ -233,22 +244,23 @@ export async function getNodeFromCache(repoId: string, nodeId: string): Promise<
 		})
 
 		// If we reach here, we either got a cached value or null
-		return result as string | null
+		return result as CachedNode | null
 	} catch (error) {
 		console.error('Error retrieving from cache:', error)
 		return null
 	}
 }
 
-export async function saveNodeToCache(repoId: string, nodeId: string, nodeCodeData: string): Promise<void> {
+export async function saveNodeToCache(repoId: string, nodeId: string, nodePath: string, nodeCodeData: string): Promise<void> {
 	const cacheKey = `repo:${repoId}:node:${nodeId}`
+	const cacheValue = { nodeId, nodePath, nodeCodeData }
 
 	await cachified({
 		key: cacheKey,
 		ttl: 1000 * 60 * 60 * 5, // 5 hours
 		cache,
 		async getFreshValue(context) {
-			return nodeCodeData
+			return cacheValue
 		},
 		checkValue(value) {
 			return value !== null
