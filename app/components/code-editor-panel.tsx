@@ -27,8 +27,8 @@ const CodeEditorPanel = () => {
 				) : (
 					nodeCodeData
 						.filter(({ nodeId }) => selectedNodes.includes(nodeId))
-						.map(({ nodeId, nodeName, code }) => (
-							<CodeEditorCard key={nodeId} nodeName={nodeName} nodeId={nodeId} nodeCode={code} />
+						.map(({ nodeId, path, code }) => (
+							<CodeEditorCard key={nodeId} nodePath={path} nodeId={nodeId} nodeCode={code} />
 						))
 				)}
 			</div>

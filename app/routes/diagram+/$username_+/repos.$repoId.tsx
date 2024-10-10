@@ -14,7 +14,7 @@ import { PanelSwitch } from '#app/routes/resources+/panel-switch'
 import FlowDiagram from '#app/components/react-flow.js'
 import {
 	fetchNodeCode,
-	getNodeCodeData,
+	getNodeCodeUrl,
 	getNodeFromCache,
 	saveNodeToCache,
 } from '#app/utils/github-repo.server.js'
@@ -39,28 +39,26 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 		throw new Response('No repo data found', { status: 404 })
 	}
 
-	const nodeCodeData: Array<{ nodeId: string; nodeName: string; code: string }> = []
+	const nodeCodeData: Array<{ nodeId: string; path: string; code: string }> = []
 
 	await Promise.all(
 		selectedNodes.map(async (nodeId) => {
 			try {
+				const nodeCodeIdentifier = await getNodeCodeUrl(repo.content, nodeId)
 				const cachedData = await getNodeFromCache(repoId, nodeId)
 
 				if (cachedData) {
-					nodeCodeData.push({ nodeId, nodeName: cachedData.nodeName, code: cachedData.nodeCodeData })
+					nodeCodeData.push({ nodeId, path: nodeCodeIdentifier.path, code: cachedData })
 				} else {
-					const rawNodeCodeData = await getNodeCodeData(repo.content, nodeId)
-					 
-					if (rawNodeCodeData) {
-						const nodePath = rawNodeCodeData.dataObject.path
-						const nodeUrl = rawNodeCodeData.dataObject.url
+					const nodeUrl = nodeCodeIdentifier.url
+					if (nodeUrl) {
 						const fetchedNodeData = await fetchNodeCode(
 							request,
 							nodeId,
 							nodeUrl,
 						)
-						await saveNodeToCache(repoId, nodeId, nodeUrl, fetchedNodeData)
-						nodeCodeData.push({ nodeId, nodeName: nodePath, code: fetchedNodeData })
+						await saveNodeToCache(repoId, nodeId, fetchedNodeData)
+						nodeCodeData.push({ nodeId, path: nodeCodeIdentifier.path, code: fetchedNodeData })
 					} else {
 						console.warn(`No URL found for node ${nodeId}`)
 					}
@@ -101,7 +99,7 @@ type LoaderData = {
 	treeData: RepoTree
 	panelState: PanelState
 	selectedNodes: string[]
-	nodeCodeData: Array<{ nodeId: string; nodeName: string; code: string }>
+	nodeCodeData: Array<{ nodeId: string; path: string; code: string }>
 }
 
 export default function Diagram() {
